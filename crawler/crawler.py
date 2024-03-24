@@ -59,9 +59,7 @@ class UniversityCrawler:
         try:
             response = self.client.data_object.create(data_object, "UniversityPage")
             if 'id' in response:
-                print(f"Data inserted with UUID: {response['id']}")
-            else:
-                print("Data inserted successfully, but UUID not returned in response.")
+                print("Data inserted successfully.")
         except Exception as e:
             print(f"Error inserting data into Weaviate: {e}")
 
