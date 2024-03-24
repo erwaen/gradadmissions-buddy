@@ -59,6 +59,7 @@ def get_test(body:str):
     out = {"content":"5 + 6 = 11","additional_kwargs":{},"response_metadata":{"token_usage":{"completion_tokens":7,"prompt_tokens":15,"total_tokens":22},"model_name":"gpt-3.5-turbo","system_fingerprint":"fp_3bc1b5746c","finish_reason":"stop","logprobs":"null"},"type":"ai","name":"null","id":"null","example":False}
     print(out)
     return out
+
 # @app.get("/items/{item_id}")
 # def read_item(item_id: int, q: Union[str, None] = None):
     # return {"item_id": item_id, "q": q}
