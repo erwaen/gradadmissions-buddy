@@ -1,22 +1,18 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-
+import weaviate
 from dotenv import load_dotenv
 
-import os
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
-import weaviate
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 class UniversityCrawler:
     def __init__(self, start_urls, max_depth=3):
         self.start_urls = start_urls
         self.visited_urls = set()
         self.max_depth = max_depth
-        self.client = weaviate.connect_to_local(host="localhost",headers={"X-Openai-Api-Key" : OPENAI_API_KEY})
+        load_dotenv()
+
+        self.client = weaviate.Client('http://localhost:8080')
+
     def crawl(self):
         for url in self.start_urls:
             self.process_url(url, 0)
@@ -53,20 +49,22 @@ class UniversityCrawler:
             return None
 
     def process_page_content(self, url, soup, depth):
-        content = soup.get_text()
+        content = ' '.join(soup.get_text().split())
+        data_object = {
+            "content": content,
+            "url": url,
+            "depth": depth
+        }
 
-        university_page_collection = self.client.collections.get("UniversityPage")
-        uuid = university_page_collection.data.insert({
-        "url": url,
-        "content": content,
-        "depth": depth
-        })
-        print(f"Data inserted with UUID: {uuid}")
+        try:
+            response = self.client.data_object.create(data_object, "UniversityPage")
+            if 'id' in response:
+                print(f"Data inserted with UUID: {response['id']}")
+            else:
+                print("Data inserted successfully, but UUID not returned in response.")
+        except Exception as e:
+            print(f"Error inserting data into Weaviate: {e}")
 
-    def url_to_filename(self, url):
-        filename = urlparse(url).netloc + urlparse(url).path
-        filename = filename.replace('/', '_').replace(':', '_').strip('_')
-        return f"{filename}.txt"
 
     def is_valid_url(self, url):
         parsed_url = urlparse(url)
@@ -82,26 +80,10 @@ class UniversityCrawler:
 
 if __name__ == "__main__":
     start_urls = [
-    "https://college.harvard.edu/admissions",
-    "https://admission.stanford.edu",
-    "https://mitadmissions.org",
-    "http://admissions.berkeley.edu",
-    "https://www.ox.ac.uk/admissions",
-    "https://www.undergraduate.study.cam.ac.uk",
-    "https://www.imperial.ac.uk/study/ug",
-    "https://future.utoronto.ca/apply",
-    "https://you.ubc.ca/admissions",
-    "https://www.mcgill.ca/undergraduate-admissions",
-    "https://www.anu.edu.au/study/apply",
-    "https://www.sydney.edu.au/study/how-to-apply.html",
-    "https://study.unimelb.edu.au/how-to-apply",
-    "https://ethz.ch/en/studies/prospective-students.html",
-    "https://www.sorbonne-universite.fr/en/admissions",
-    "https://www.lmu.de/en/study/application-and-acceptance/index.html",
-    "https://www.nus.edu.sg/oam/apply-to-nus",
-    "http://www.tsinghua.edu.cn/publish/thu2018en/newthuen_cnt/admissions/admissions-1.html",
-    "https://www.u-tokyo.ac.jp/en/prospective-students/admissions.html"
-]
+        "https://college.harvard.edu/admissions",
+        "https://admission.stanford.edu",
+        "https://mitadmissions.org",
+    ]
 
     crawler = UniversityCrawler(start_urls)
     crawler.crawl()
