@@ -41,9 +41,9 @@ def rag_endpoint(input: QueryInput):
 
 
     combined_input = f"{retrieved_content}\n\n{input.query}"
-    #response = model.invoke(combined_input)
-    response = combined_input
-    return QueryOutput(response=response)
+    response = model.invoke(combined_input)
+    # response = combined_input
+    return QueryOutput(response=str(response))
 
 if __name__ == "__main__":
     import uvicorn
