@@ -22,11 +22,8 @@ class QueryOutput(BaseModel):
     response: str
 
 def retrieve_from_weaviate(query: str) -> str:
-
-    result = client.query.get("UniversityPage", ["content"]).with_where({
-        'path': ["content"], 
-        'operator': "Like", 
-        'valueText': f"%{query}%"
+    result = client.query.get("UniversityPage", ["content"]).with_near_text({
+        'concepts': [query]
     }).do()
     if result and result['data']['Get']['UniversityPage']:
         return result['data']['Get']['UniversityPage'][0]['content']
@@ -41,10 +38,11 @@ def rag_endpoint(input: QueryInput):
 
 
     combined_input = f"{retrieved_content}\n\n{input.query}"
-    response = model.invoke(combined_input)
-    # response = combined_input
+    response = combined_input
+    #response = model.invoke(combined_input)
+    
     return QueryOutput(response=str(response))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=80)
+    uvicorn.run(app, host="127.0.0.1", port=80,reload=True)
