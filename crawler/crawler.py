@@ -4,24 +4,31 @@ from urllib.parse import urljoin, urlparse
 import weaviate
 import spacy
 import re
-
+import json
 class UniversityCrawler:
-    def __init__(self, start_urls, max_depth=3, batch_size=10):
+    #Acá podemos definir la profundidad del arbol de búsqueda que atraviesa el crawler.
+    def __init__(self, start_urls, max_depth=3, batch_size=10,use_weaviate=True, output_file='data.json'):
         self.start_urls = start_urls
         self.visited_urls = set()
         self.max_depth = max_depth
         self.batch_size = batch_size
         self.batch_data = []
-        self.client = weaviate.Client('http://localhost:8080')
+        if use_weaviate:
+            self.client = weaviate.Client('http://localhost:8080')
+            self.client.batch.configure(batch_size=100, dynamic=True)
+        
         self.nlp = spacy.load("en_core_web_sm")
-        self.client.batch.configure(batch_size=100, dynamic=True)
+        self.use_weaviate = use_weaviate
+        self.output_file = output_file
     def crawl(self):
         for url in self.start_urls:
             self.process_url(url, 0)
-
+        self.finalize_batch()
     def process_url(self, url, depth):
+        #Si encontramos una página ya visitada en las urls, omitimos su procesamiento
         if url in self.visited_urls or depth > self.max_depth:
             return
+        #Caso contrario, lo añadimos al 
         self.visited_urls.add(url)
         print(f"Crawling URL (depth {depth}): {url}")
         soup = self.fetch_url(url)
@@ -49,9 +56,20 @@ class UniversityCrawler:
             "depth": depth
         }
 
-        # Add the data object to the batch
-        print(self.client.batch.add_data_object(data_object, class_name="UniversityPage"))
+        if self.use_weaviate:
+            self.client.batch.add_data_object(data_object, class_name="UniversityPage")
+        else:
+            self.batch_data.append(data_object)
 
+    def save_data_to_file(self):
+        with open(self.output_file, 'w', encoding='utf-8') as f:
+            json.dump(self.batch_data, f, ensure_ascii=False, indent=4)
+
+    def finalize_batch(self):
+        if self.use_weaviate:
+            self.client.batch.flush()
+        else:
+            self.save_data_to_file()
     def preprocess_text(self, text):
         doc = self.nlp(text)
         result = []
@@ -86,9 +104,6 @@ class UniversityCrawler:
     def is_relevant_url(self, url):
         keywords = ['admissions', 'apply', 'application', 'program', 'course']
         return any(keyword in url for keyword in keywords)
-    def finalize_batch(self):
-        # Flush any remaining objects in the batch
-        self.client.batch.flush()
     def insert_batch_data(self):
         if self.batch_data:
             try:
@@ -112,6 +127,6 @@ start_urls = [
 "https://mitadmissions.org",
 # Add more URLs as needed
 ]
-crawler = UniversityCrawler(start_urls)
+crawler = UniversityCrawler(start_urls,use_weaviate=False)
 crawler.crawl()
 
