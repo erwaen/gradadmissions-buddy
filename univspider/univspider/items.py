@@ -5,12 +5,6 @@
 
 import scrapy
 
-
-class UnivspiderItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
-
 class UniversityItem(scrapy.Item):
     id = scrapy.Field()
     university_name = scrapy.Field()
