@@ -46,4 +46,4 @@ class UniversitySpider(CrawlSpider):
             json_data.append(json_item)
 
         with open('university_data.json', 'w') as f:
-            json.dump(json_data, f, indent=4)  # Agrega indent=4 para formatear con sangrías y mejorar la legibilidad
+            json.dump(json_data, f, indent=4)
