@@ -1,8 +1,12 @@
 # ejemplo readme
 
+1. instalar las dependencias
+```bash
+pip install -r requirements.txt
+```
 
-Para correr
+2. Para correr
 
 ```bash
-python3 main.py
+scrapy crawl university
 ```
