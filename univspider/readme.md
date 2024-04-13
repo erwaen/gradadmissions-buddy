@@ -3,6 +3,6 @@
 
 Para correr
 
-bash```
+```bash
 python3 main.py
 ```
