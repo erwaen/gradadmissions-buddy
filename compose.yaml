@@ -1,0 +1,10 @@
+services:
+  backend_db:
+    build: 
+      context: ./backend
+      #dockerfile: ./Dockerfile
+    image: backend_db_img
+    # container_name: backend_db_container
+    env_file:
+      - ./backend/.env
+    command: python main.py
