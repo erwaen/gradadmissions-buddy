@@ -21,30 +21,66 @@ class QueryInput(BaseModel):
 class QueryOutput(BaseModel):
     response: str
 
-def retrieve_from_weaviate(query: str) -> str:
-    result = client.query.get("UniversityPage", ["content"]).with_near_text({
-        'concepts': [query]
-    }).do()
-    if result and result['data']['Get']['UniversityPage']:
-        return result['data']['Get']['UniversityPage'][0]['content']
-    else:
-        return ""
-@app.post("")
-def test():
-    return "HOLA KP XD"
-@app.post("/rag", response_model=QueryOutput)
-def rag_endpoint(input: QueryInput):
-    retrieved_content = retrieve_from_weaviate(input.query)
-    if not retrieved_content:
-        raise HTTPException(status_code=404, detail="No relevant data found in Weaviate.")
+import json
 
+class DataSplitter:
+    def __init__(self, input_file, output_file, chunk_size=500):
+        self.input_file = input_file
+        self.output_file = output_file
+        self.chunk_size = chunk_size  # Max characters per chunk
 
-    combined_input = f"{retrieved_content}\n\n{input.query}"
-    response = combined_input
-    #response = model.invoke(combined_input)
-    
-    return QueryOutput(response=str(response))
+    def load_data(self):
+        with open(self.input_file, 'r', encoding='utf-8') as file:
+            return json.load(file)
+
+    def save_data(self, data):
+        with open(self.output_file, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+
+    def split_content(self, content):
+        words = content.split()
+        chunks = []
+        current_chunk = []
+        current_length = 0
+
+        for word in words:
+            if current_length + len(word) + 1 > self.chunk_size:
+                chunks.append(' '.join(current_chunk))
+                current_chunk = [word]
+                current_length = len(word)
+            else:
+                current_chunk.append(word)
+                current_length += len(word) + 1
+
+        if current_chunk:
+            chunks.append(' '.join(current_chunk))
+
+        return chunks
+
+    def process_data(self):
+        data = self.load_data()
+        processed_data = []
+        last_id = None
+
+        for item in data:
+            chunks = self.split_content(item['content'])
+            for i, chunk in enumerate(chunks):
+                new_item = {
+                    'id': f"{item['id']}_{i}",
+                    'url': item['url'],
+                    'university_name': item['university_name'],
+                    'content': chunk,
+                    'next_id': f"{item['id']}_{i+1}" if i < len(chunks) - 1 else None
+                }
+                processed_data.append(new_item)
+
+        self.save_data(processed_data)
+
+@app.post("/update-DB/")
+async def process_data():
+    splitter = DataSplitter('data.json', 'out.json')
+    splitter.process_data()
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=80,reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=80,reload=False)
