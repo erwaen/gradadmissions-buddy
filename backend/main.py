@@ -23,21 +23,26 @@ class QueryOutput(BaseModel):
 
 
 
+import json
+
 class DataSplitter:
     def __init__(self, input_file, output_file, chunk_size=500):
         self.input_file = input_file
         self.output_file = output_file
-        self.chunk_size = chunk_size
+        self.chunk_size = chunk_size  # Max characters per chunk
 
     def load_data(self):
+        """Load data from a JSON file."""
         with open(self.input_file, 'r', encoding='utf-8') as file:
             return json.load(file)
 
     def save_data(self, data):
+        """Save processed data to a JSON file."""
         with open(self.output_file, 'w', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
 
     def split_content(self, content):
+        """Split content into chunks based on specified size."""
         words = content.split()
         chunks = []
         current_chunk = []
@@ -58,23 +63,40 @@ class DataSplitter:
         return chunks
 
     def process_data(self):
+        """Process data to create chunks with linkage."""
         data = self.load_data()
         processed_data = []
-        last_id = None
 
-        for item in data:
-            chunks = self.split_content(item['content'])
-            for i, chunk in enumerate(chunks):
-                new_item = {
-                    'id': f"{item['id']}_{i}",
-                    'url': item['url'],
-                    'university_name': item['university_name'],
-                    'content': chunk,
-                    'next_id': f"{item['id']}_{i+1}" if i < len(chunks) - 1 else None
+        for entry in data:
+            content_chunks = self.split_content(entry['content'])
+            previous_id = None
+
+            for i, chunk in enumerate(content_chunks):
+                chunk_id = i
+                next_id = i+1 if i < len(content_chunks) - 1 else None
+
+                chunk_entry = {
+                    "id": entry['id'],
+                    "url": entry['url'],
+                    "university_name": entry['university_name'],
+                    "content": chunk,
+                    "chunk_id": i,
+                    "previous_id": previous_id,
+                    "next_id": next_id
                 }
-                processed_data.append(new_item)
+<<<<<<< HEAD
+                processed_data.append(chunk_entry)
+                previous_id = chunk_id 
+=======
 
+                processed_data.append(chunk_entry)
+                previous_id = chunk_id  # Update previous_id for the next chunk
+
+>>>>>>> 4c5e01916f422cc421a3e6cf73921a5ce0204e42
         self.save_data(processed_data)
+
+
+
 
 
 class UniversityDataHandler:
@@ -106,7 +128,7 @@ class UniversityDataHandler:
         self.client.schema.create(schema)
 
     def add_university(self, uuid, url, name):
-        """Add a university object to Weaviate."""
+
         university_object = {
             "url": url,
             "university_name": name
@@ -114,7 +136,6 @@ class UniversityDataHandler:
         self.client.data_object.create(university_object, "University", uuid)
 
     def add_university_page(self, uuid, content, university_uuid, next_chunk_uuid=None):
-        """Add a university page object to Weaviate with optional reference to the next chunk."""
         page_object = {
             "content": content,
             "university": {
