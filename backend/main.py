@@ -84,15 +84,8 @@ class DataSplitter:
                     "previous_id": previous_id,
                     "next_id": next_id
                 }
-<<<<<<< HEAD
                 processed_data.append(chunk_entry)
                 previous_id = chunk_id 
-=======
-
-                processed_data.append(chunk_entry)
-                previous_id = chunk_id  # Update previous_id for the next chunk
-
->>>>>>> 4c5e01916f422cc421a3e6cf73921a5ce0204e42
         self.save_data(processed_data)
 
 
