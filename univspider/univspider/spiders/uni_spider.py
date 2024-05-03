@@ -1,6 +1,7 @@
 import scrapy
 import json
 import os
+import re
 
 class UniversitySpider(scrapy.Spider):
     name = 'university'
@@ -40,7 +41,8 @@ class UniversitySpider(scrapy.Spider):
         if depth < self.max_depth_per_university:
             links = response.css('a::attr(href)').getall()
             for link in links:
-                yield response.follow(link, meta={'id': university_id, 'university_name': university_name, 'depth': depth + 1}, callback=self.parse)
+                if self.is_edu_link(link):
+                    yield response.follow(link, meta={'id': university_id, 'university_name': university_name, 'depth': depth + 1}, callback=self.parse)
 
     def save_item(self, item, university_id):
         filename = f'archivos_json/university_{university_id}.json'
@@ -48,7 +50,7 @@ class UniversitySpider(scrapy.Spider):
             if os.stat(filename).st_size == 0:
                 f.write("[")
             else:
-                f.write(",")
+                f.write(",\n")
             json.dump(item, f, ensure_ascii=False)
             f.write("\n")
         
@@ -62,3 +64,8 @@ class UniversitySpider(scrapy.Spider):
             with open(filename, 'a', encoding='utf-8') as f:
                 f.write("]")
         self.log('Spider closed.')
+    
+    def is_edu_link(self, link):
+        pattern = r'^https?://(?:[a-zA-Z0-9-]+\.)+(?:edu)/?'
+        return re.match(pattern, link)
+
