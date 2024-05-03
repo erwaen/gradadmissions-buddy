@@ -19,6 +19,11 @@ class UniversitySpider(scrapy.Spider):
         university_id = response.meta['id']
         university_name = response.meta['university_name']
         
+        # Extraer el título de la página (texto del primer h1)
+        title = response.css('h1::text').get()
+        # Limpiar el título de caracteres de nueva línea y tabulación
+        title = title.strip() if title else ''
+
         # Extraer texto del cuerpo de la respuesta y eliminar caracteres de nueva línea y tabulación
         content = response.css('body').xpath('string()').get()
         content = content.replace('\n', '').replace('\t', '')
@@ -28,6 +33,7 @@ class UniversitySpider(scrapy.Spider):
                 'id': university_id,
                 'url': response.url,
                 'university_name': university_name,
+                'title': title,
                 'content': content
             }
             self.save_item(item, university_id)
@@ -59,4 +65,3 @@ class UniversitySpider(scrapy.Spider):
             with open(filename, 'a', encoding='utf-8') as f:
                 f.write("]")
         self.log('Spider closed.')
-
