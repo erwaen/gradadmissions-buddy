@@ -1,12 +1,9 @@
 import scrapy
 import json
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
+import os
 
-class UniversitySpider(CrawlSpider):
+class UniversitySpider(scrapy.Spider):
     name = 'university'
-    allowed_domains = ['cs.uchicago.edu', 'gradschool.princeton.edu', 'gradschool.cornell.edu',
-                       'cs.columbia.edu', 'cs.jhu.edu', 'cse.engin.umich.edu', 'cs.rochester.edu']
     start_urls = [
         ("https://cs.uchicago.edu/mpcs", "University of Chicago"),
         ("https://gradschool.princeton.edu/academics/degrees-requirements/fields-study/computer-science", "Princeton University"),
@@ -16,34 +13,50 @@ class UniversitySpider(CrawlSpider):
         ("https://cse.engin.umich.edu/academics/graduate/", "University of Michigan"),
         ("https://www.cs.rochester.edu/graduate/masters-program.html", "University of Rochester")
     ]
+    max_depth_per_university = 2
 
-    rules = (
-        Rule(LinkExtractor(allow=()), callback='parse_item', follow=True),
-    )
+    def parse(self, response):
+        university_id = response.meta['id']
+        university_name = response.meta['university_name']
+        
+        # Extraer texto del cuerpo de la respuesta y eliminar caracteres de nueva línea y tabulación
+        content = response.css('body').xpath('string()').get()
+        content = content.replace('\n', '').replace('\t', '')
 
-    def parse_item(self, response):
-        item = {
-            'id': response.meta['id'],
-            'url': response.url,
-            'university_name': response.meta['university_name'],
-            'content': ' '.join(response.css('p::text, h1::text, h2::text').getall())
-        }
-        yield item
+        if content:
+            item = {
+                'id': university_id,
+                'url': response.url,
+                'university_name': university_name,
+                'content': content
+            }
+            self.save_item(item, university_id)
 
+        # Guardar contenido de todos los enlaces con la misma estructura
+        depth = response.meta.get('depth', 1)
+        if depth < self.max_depth_per_university:
+            links = response.css('a::attr(href)').getall()
+            for link in links:
+                yield response.follow(link, meta={'id': university_id, 'university_name': university_name, 'depth': depth + 1}, callback=self.parse)
+
+    def save_item(self, item, university_id):
+        filename = f'archivos_json/university_{university_id}.json'
+        with open(filename, 'a', encoding='utf-8') as f:
+            if os.stat(filename).st_size == 0:
+                f.write("[")
+            else:
+                f.write(",")
+            json.dump(item, f, ensure_ascii=False)
+            f.write("\n")
+        
     def start_requests(self):
-        for idx, (url, university_name) in enumerate(self.start_urls):
-            yield scrapy.Request(url, meta={'id': idx + 1, 'university_name': university_name}, callback=self.parse_item)
+        for idx, (url, university_name) in enumerate(self.start_urls, start=1):
+            yield scrapy.Request(url, meta={'id': idx, 'university_name': university_name, 'depth': 1}, callback=self.parse)
 
     def closed(self, reason):
-        json_data = []
-        for item in self.items:
-            json_item = {
-                'id': item['id'],
-                'university_name': item['university_name'],
-                'url': item['url'],
-                'content': item['content']
-            }
-            json_data.append(json_item)
+        for idx, _ in enumerate(self.start_urls, start=1):
+            filename = f'archivos_json/university_{idx}.json'
+            with open(filename, 'a', encoding='utf-8') as f:
+                f.write("]")
+        self.log('Spider closed.')
 
-        with open('university_data.json', 'w') as f:
-            json.dump(json_data, f, indent=4)
