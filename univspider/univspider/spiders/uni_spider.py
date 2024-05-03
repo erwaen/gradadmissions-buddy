@@ -19,12 +19,9 @@ class UniversitySpider(scrapy.Spider):
         university_id = response.meta['id']
         university_name = response.meta['university_name']
         
-        # Extraer el título de la página (texto del primer h1)
         title = response.css('h1::text').get()
-        # Limpiar el título de caracteres de nueva línea y tabulación
         title = title.strip() if title else ''
-
-        # Extraer texto del cuerpo de la respuesta y eliminar caracteres de nueva línea y tabulación
+        
         content = response.css('body').xpath('string()').get()
         content = content.replace('\n', '').replace('\t', '')
 
