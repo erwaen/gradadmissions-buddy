@@ -2,6 +2,8 @@ import scrapy
 import json
 import os
 import re
+from bs4 import BeautifulSoup
+
 
 class UniversitySpider(scrapy.Spider):
     name = 'university'
@@ -27,6 +29,7 @@ class UniversitySpider(scrapy.Spider):
         content = ' '.join(content)  # Convertir la lista de strings a un solo string
         content = re.sub(r'\s+', ' ', content)  # Eliminar espacios en blanco adicionales
 
+        content = BeautifulSoup(content).text
         if content:
             item = {
                 'id': university_id,
