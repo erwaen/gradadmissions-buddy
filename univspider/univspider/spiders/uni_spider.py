@@ -23,8 +23,9 @@ class UniversitySpider(scrapy.Spider):
         title = response.css('h1::text').get()
         title = title.strip() if title else ''
         
-        content = response.css('body').xpath('string()').get()
-        content = content.replace('\n', '').replace('\t', '')
+        content = response.xpath('//body//text()').getall()  # Obtener todo el texto dentro del cuerpo
+        content = ' '.join(content)  # Convertir la lista de strings a un solo string
+        content = re.sub(r'\s+', ' ', content)  # Eliminar espacios en blanco adicionales
 
         if content:
             item = {
@@ -68,4 +69,3 @@ class UniversitySpider(scrapy.Spider):
     def is_edu_link(self, link):
         pattern = r'^https?://(?:[a-zA-Z0-9-]+\.)+(?:edu)/?'
         return re.match(pattern, link)
-
