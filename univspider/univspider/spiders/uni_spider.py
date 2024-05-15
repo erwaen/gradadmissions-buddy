@@ -38,6 +38,7 @@ class UniversitySpider(scrapy.Spider):
         
         content = self.fetch_text_from_url(response.url)  # Obtener solo el texto del cuerpo de la página
 
+        content = BeautifulSoup(content).text
         if content:
             item = {
                 'id': university_id,
