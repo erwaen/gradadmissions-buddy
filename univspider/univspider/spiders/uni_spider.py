@@ -36,7 +36,7 @@ class UniversitySpider(scrapy.Spider):
         title = response.css('h1::text').get()
         title = title.strip() if title else ''
         
-        content = self.fetch_text_from_url(response.url)  # Obtener solo el texto del cuerpo de la página
+        content = self.fetch_text_from_url(response.url)
 
         content = BeautifulSoup(content).text
         if content:
@@ -50,16 +50,14 @@ class UniversitySpider(scrapy.Spider):
             }
             self.save_item(item, university_id)
 
-        # Guardar contenido de todos los enlaces con la misma estructura
         depth = response.meta.get('depth', 1)
         if depth < self.max_depth_per_university:
             links = response.css('a::attr(href)').getall()
             for link in links:
                 if self.is_edu_link(link):
-                    # Verificar si el enlace ya ha sido visitado antes de seguirlo
                     next_link = response.urljoin(link)
                     if next_link not in self.visited_urls:
-                        self.visited_urls.add(next_link)  # Agregar el enlace al conjunto de URLs visitadas
+                        self.visited_urls.add(next_link) 
                         yield response.follow(link, meta={'id': university_id, 'university_name': university_name, 'depth': depth + 1}, callback=self.parse)
 
     def fetch_text_from_url(self, url):
@@ -67,7 +65,6 @@ class UniversitySpider(scrapy.Spider):
             response = requests.get(url)
             response.raise_for_status()
             soup = BeautifulSoup(response.text, 'html.parser')
-            # Encuentra el cuerpo de la página y extrae el texto
             body = soup.find('body')
             if body:
                 return self.clean_text(body.get_text(separator=' ', strip=True))
@@ -78,10 +75,9 @@ class UniversitySpider(scrapy.Spider):
             return None
     
     def clean_text(self, text):
-        # Elimina las variables de plantilla y otros patrones no deseados
         cleaned_text = re.sub(r'\{\{.*?\}\}', '', text)
-        cleaned_text = re.sub(r'\{\{.*?$', '', cleaned_text)  # Elimina líneas incompletas con patrón de plantilla
-        cleaned_text = re.sub(r'Add to GMail Close', '', cleaned_text)  # Elimina líneas específicas
+        cleaned_text = re.sub(r'\{\{.*?$', '', cleaned_text) 
+        cleaned_text = re.sub(r'Add to GMail Close', '', cleaned_text)
         return cleaned_text.strip()
 
     def save_item(self, item, university_id):
