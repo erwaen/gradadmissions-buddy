@@ -16,7 +16,10 @@ class UniversitySpider(scrapy.Spider):
         ("https://www.cs.columbia.edu/education/ms/", "Columbia University"),
         ("https://www.cs.jhu.edu/academic-programs/graduate-studies/mse-programs/", "Johns Hopkins University"),
         ("https://cse.engin.umich.edu/academics/graduate/", "University of Michigan"),
-        ("https://www.cs.rochester.edu/graduate/masters-program.html", "University of Rochester")
+        ("https://www.cs.rochester.edu/graduate/masters-program.html", "University of Rochester"),
+        ("https://college.harvard.edu/admissions", "Harvard University"),
+        ("https://www.stanford.edu/admission/", "Stanford University"),
+        ("https://www.ox.ac.uk/admissions/graduate","University of Oxford")
     ]
     max_depth_per_university = 2
     visited_urls = set()
@@ -27,6 +30,9 @@ class UniversitySpider(scrapy.Spider):
 
         for idx, (url, university_name) in enumerate(self.start_urls, start=1):
             if universities_to_scrape is None or str(idx) in universities_to_scrape:
+                filename = f'archivos_json/university_{idx}.json'
+                if os.path.exists(filename):
+                    os.remove(filename)
                 yield scrapy.Request(url, meta={'id': idx, 'university_name': university_name, 'depth': 1}, callback=self.parse)
     
     def parse(self, response):
@@ -81,14 +87,27 @@ class UniversitySpider(scrapy.Spider):
         return cleaned_text.strip()
 
     def save_item(self, item, university_id):
-        filename = f'archivos_json/university_{university_id}.json'
-        with open(filename, 'a', encoding='utf-8') as f:
-            if os.stat(filename).st_size == 0:
-                f.write("[")
-            else:
-                f.write(",\n")
-            json.dump(item, f, ensure_ascii=False)
-            f.write("\n")
+        directory = 'archivos_json'
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        filename = f'{directory}/university_{university_id}.json'
+
+        # Cargar datos existentes si el archivo ya existe, de lo contrario, inicializar como lista vacía
+        if os.path.exists(filename):
+            with open(filename, 'r', encoding='utf-8') as f:
+                try:
+                    data = json.load(f)
+                except json.decoder.JSONDecodeError:
+                    data = []
+        else:
+            data = []
+
+        # Añadir el nuevo item
+        data.append(item)
+
+        # Escribir todos los datos en el archivo
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
 
     def closed(self, reason):
         for idx, _ in enumerate(self.start_urls, start=1):
