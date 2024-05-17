@@ -91,8 +91,6 @@ class UniversitySpider(scrapy.Spider):
         if not os.path.exists(directory):
             os.makedirs(directory)
         filename = f'{directory}/university_{university_id}.json'
-
-        # Cargar datos existentes si el archivo ya existe, de lo contrario, inicializar como lista vacía
         if os.path.exists(filename):
             with open(filename, 'r', encoding='utf-8') as f:
                 try:
@@ -101,11 +99,7 @@ class UniversitySpider(scrapy.Spider):
                     data = []
         else:
             data = []
-
-        # Añadir el nuevo item
         data.append(item)
-
-        # Escribir todos los datos en el archivo
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
