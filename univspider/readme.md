@@ -60,7 +60,7 @@ Cada archivo JSON contiene un array de objetos donde cada objeto representa un e
 [
     {
         "id": "El ID único del elemento scrapeado",
-        "data": "La fecha y hora en que se realizó el scrapeo",
+        "date": "La fecha y hora en que se realizó el scrapeo",
         "url": "La URL del sitio web de la universidad de donde se extrajeron los datos",
         "university_name": "El nombre de la universidad correspondiente",
         "title": "El título del contenido scrapeado, si está disponible",
@@ -76,7 +76,7 @@ Ejemplo de cómo podría verse un archivo JSON para la Universidad de Chicago:
 [
     {
         "id": 1,
-        "data": "2024-05-17T19:20:35.819807",
+        "date": "2024-05-17T19:20:35.819807",
         "url": "https://accessibility.uchicago.edu",
         "university_name": "University of Chicago",
         "title": "Access UChicago Now",

@@ -15,14 +15,15 @@ class UniversitySpider(scrapy.Spider):
         ("https://gradschool.cornell.edu/academics/fields-of-study/subject/computer-science/computer-science-ms-ithaca/", "Cornell University"),
         ("https://www.cs.columbia.edu/education/ms/", "Columbia University"),
         ("https://www.cs.jhu.edu/academic-programs/graduate-studies/mse-programs/", "Johns Hopkins University"),
-        ("https://cse.engin.umich.edu/academics/graduate/", "University of Michigan"),
+        ("https://www.washington.edu/admissions/", "University of Washington"),
         ("https://www.cs.rochester.edu/graduate/masters-program.html", "University of Rochester"),
         ("https://college.harvard.edu/admissions", "Harvard University"),
         ("https://www.stanford.edu/admission/", "Stanford University"),
-        ("https://www.ox.ac.uk/admissions/graduate","University of Oxford")
+        ("https://www.upenn.edu/admissions","University of Pensylvania")
     ]
     max_depth_per_university = 2
     visited_urls = set()
+    document_counter = {}  # Contador de documentos por universidad
     
     def start_requests(self):
         universities_arg = getattr(self, 'universities', None)
@@ -30,31 +31,38 @@ class UniversitySpider(scrapy.Spider):
 
         for idx, (url, university_name) in enumerate(self.start_urls, start=1):
             if universities_to_scrape is None or str(idx) in universities_to_scrape:
-                filename = f'archivos_json/university_{idx}.json'
-                if os.path.exists(filename):
-                    os.remove(filename)
                 yield scrapy.Request(url, meta={'id': idx, 'university_name': university_name, 'depth': 1}, callback=self.parse)
     
     def parse(self, response):
         university_id = response.meta['id']
         university_name = response.meta['university_name']
+
+        if response.status != 200:
+            self.log(f"Failed to retrieve {response.url} (status: {response.status})")
+            return
         
-        title = response.css('h1::text').get()
+        #title = response.css('h1::text').get()
+        title = response.css('h1::text, h2::text').get()
         title = title.strip() if title else ''
         
         content = self.fetch_text_from_url(response.url)
+        if not content:
+            self.log(f"No content fetched from {response.url}")
+            return
 
-        content = BeautifulSoup(content).text
+        content = BeautifulSoup(content, 'html.parser').text
         if content:
             item = {
                 'id': university_id,
-                'data': datetime.datetime.now().isoformat(),
+                'date': datetime.datetime.now().isoformat(),
                 'url': response.url,
                 'university_name': university_name,
                 'title': title,
                 'content': content
             }
             self.save_item(item, university_id)
+        else:
+            self.log(f"No text content found in {response.url}")
 
         depth = response.meta.get('depth', 1)
         if depth < self.max_depth_per_university:
@@ -77,7 +85,7 @@ class UniversitySpider(scrapy.Spider):
             else:
                 return None
         except requests.RequestException as e:
-            print(f"Error fetching {url}: {e}")
+            self.log(f"Error fetching {url}: {e}")
             return None
     
     def clean_text(self, text):
@@ -87,27 +95,24 @@ class UniversitySpider(scrapy.Spider):
         return cleaned_text.strip()
 
     def save_item(self, item, university_id):
-        directory = 'archivos_json'
+        directory = f'dataset/university{university_id}'
         if not os.path.exists(directory):
             os.makedirs(directory)
-        filename = f'{directory}/university_{university_id}.json'
-        if os.path.exists(filename):
-            with open(filename, 'r', encoding='utf-8') as f:
-                try:
-                    data = json.load(f)
-                except json.decoder.JSONDecodeError:
-                    data = []
+
+        # Incrementar el contador de documentos para esta universidad
+        if university_id not in self.document_counter:
+            self.document_counter[university_id] = 1
         else:
-            data = []
-        data.append(item)
+            self.document_counter[university_id] += 1
+
+        # Generar el nombre del archivo
+        document_number = self.document_counter[university_id]
+        filename = f'{directory}/documento{document_number}.json'
+
         with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            json.dump(item, f, ensure_ascii=False, indent=2)
 
     def closed(self, reason):
-        for idx, _ in enumerate(self.start_urls, start=1):
-            filename = f'archivos_json/university_{idx}.json'
-            with open(filename, 'a', encoding='utf-8') as f:
-                f.write("]")
         self.log('Spider closed.')
     
     def is_edu_link(self, link):
