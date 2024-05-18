@@ -34,7 +34,8 @@ Para iniciar el proceso de scraping y obtener los documentos de las universidade
 scrapy crawl university
 ```
 Para correr el crawler y obtener documentos de algunas universidades específicas, utiliza el comando -a seguido del parámetro correspondiente. Por ejemplo, para especificar una lista de universidades con el id 1, 3, 5
-Lista de universidades:
+
+## Lista de universidades:
 ID          NOMBRE
 1           University of Chicago
 2           Princeton University
