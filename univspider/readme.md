@@ -50,9 +50,41 @@ Para correr el crawler y obtener documentos de algunas universidades específica
 | 10 | University of Oxford       |
 
 ```bash
-scrapy crawl university -a universities=1,3,5
+scrapy crawl university -a universities=<ID>
 ```
+### Estructura del archivo JSON
 
+Cada archivo JSON contiene un array de objetos donde cada objeto representa un elemento scrapeado del sitio web de la universidad. La estructura de cada objeto es la siguiente:
+
+```json
+[
+    {
+        "id": "El ID único del elemento scrapeado",
+        "data": "La fecha y hora en que se realizó el scrapeo",
+        "url": "La URL del sitio web de la universidad de donde se extrajeron los datos",
+        "university_name": "El nombre de la universidad correspondiente",
+        "title": "El título del contenido scrapeado, si está disponible",
+        "content": "El contenido scrapeado, que puede incluir texto"
+    },
+    ...
+]
+```
+### Ejemplo
+Ejemplo de cómo podría verse un archivo JSON para la Universidad de Chicago:
+
+```json
+[
+    {
+        "id": 1,
+        "data": "2024-05-17T19:20:35.819807",
+        "url": "https://accessibility.uchicago.edu",
+        "university_name": "University of Chicago",
+        "title": "Access UChicago Now",
+        "content": "The University of Chicago Home About Leadership Team 2023-2024 Academic Year 2022-2023 Academic Year 2021-2022..." 
+    },
+    ...
+]
+```
 ## Iniciar el Microservicio
 
 ### Prerrequisitos
