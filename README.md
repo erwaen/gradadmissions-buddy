@@ -27,20 +27,7 @@ Este comando construirá las imágenes Docker necesarias y levantará todos los 
 ```yaml
 services:
   backend_db:
-    build:
-      context: ./backend
-    image: backend_db_img
-    volumes:
-      - ./backend:/usr/src/app/
-    env_file:
-      - ./backend/.env
-    command: python main.py
-    ports:
-      - "69:80"
-    networks:
-      - app-network
-    depends_on:
-      - weaviate
+    # Configuración del servicio de Backend_DB
   weaviate:
     # Configuración del servicio Weaviate
   contextionary:
