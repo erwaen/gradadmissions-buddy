@@ -85,21 +85,13 @@ Ejemplo de cómo podría verse un archivo JSON para la Universidad de Chicago:
     ...
 ]
 ```
-## Iniciar el Microservicio
+### Iniciar el Microservicio
 
 ### Prerrequisitos
 
 - Python 3.7 o superior
 - FastAPI
 - Uvicorn
-
-### Instalación de Dependencias
-
-Asegúrate de que todas las dependencias estén instaladas. Si aún no lo has hecho, ejecuta:
-
-```bash
-pip3 install -r requirements.txt
-```
 
 ### Para iniciar el microservicio, utiliza el siguiente comando:
 
