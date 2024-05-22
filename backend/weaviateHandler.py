@@ -92,9 +92,10 @@ def insert_into_weaviate(json_file, weaviate_url):
 
     # Load data from JSON file
     with open(json_file, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-
-    # Insert data into Weaviate
+        try:
+            data = json.load(file)
+        except json.JSONDecodeError:#Perdon por este parche feo xd
+            raise "No elements in splitted buffer to insert, did you forget split the data?"
     for entry in data:
         properties = {
             "url": entry['url'],
