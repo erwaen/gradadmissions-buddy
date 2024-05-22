@@ -56,7 +56,19 @@ services:
       - "9999:9999"
     networks:
       - app-network
-
+  univspider:
+    build:
+      context: ./backend
+    image: univspider_img
+    volumes:
+      - ./backend:/usr/src/app/
+    env_file:
+      - ./backend/.env
+    command: python main.py
+    ports:
+      - "420:80"
+    networks:
+      - app-network
 networks:
   app-network:
     driver: bridge

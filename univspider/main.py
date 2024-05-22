@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 import glob
-
+import uvicorn
 class GetDocumentosIN (BaseModel):
     id: int
     desde: int
@@ -69,3 +69,6 @@ async def query_title(title: str):
         return results
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="No documents found")
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=80, reload=False)
