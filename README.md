@@ -1,5 +1,3 @@
-Here is the updated `README.md` documentation for your project with all required sections.
-
 # gradadmissions-buddy
 
 ## Descripción del Proyecto
