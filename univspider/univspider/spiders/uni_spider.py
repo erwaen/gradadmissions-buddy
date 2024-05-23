@@ -19,7 +19,7 @@ class UniversitySpider(scrapy.Spider):
         ("https://www.cs.rochester.edu/graduate/masters-program.html", "University of Rochester"),
         ("https://college.harvard.edu/admissions", "Harvard University"),
         ("https://www.stanford.edu/admission/", "Stanford University"),
-        ("https://www.upenn.edu/admissions","University of Pensylvania")
+        ("https://www.upenn.edu/admissions","University of Pennsylvania")
     ]
     max_depth_per_university = 2
     visited_urls = set()
@@ -41,7 +41,6 @@ class UniversitySpider(scrapy.Spider):
             self.log(f"Failed to retrieve {response.url} (status: {response.status})")
             return
         
-        #title = response.css('h1::text').get()
         title = response.css('h1::text, h2::text').get()
         title = title.strip() if title else ''
         
@@ -95,22 +94,24 @@ class UniversitySpider(scrapy.Spider):
         return cleaned_text.strip()
 
     def save_item(self, item, university_id):
-        directory = f'dataset/university{university_id}'
+        directory = 'archivos_json'
         if not os.path.exists(directory):
             os.makedirs(directory)
+            self.log(f"Created directory: {directory}")
 
-        # Incrementar el contador de documentos para esta universidad
-        if university_id not in self.document_counter:
-            self.document_counter[university_id] = 1
+        filename = f'{directory}/university_{university_id}.json'
+
+        if not os.path.exists(filename):
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump([item], f, ensure_ascii=False, indent=2)
+            self.log(f"Created new file: {filename}")
         else:
-            self.document_counter[university_id] += 1
-
-        # Generar el nombre del archivo
-        document_number = self.document_counter[university_id]
-        filename = f'{directory}/documento{document_number}.json'
-
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(item, f, ensure_ascii=False, indent=2)
+            with open(filename, 'r+', encoding='utf-8') as f:
+                data = json.load(f)
+                data.append(item)
+                f.seek(0)
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            self.log(f"Appended to existing file: {filename}")
 
     def closed(self, reason):
         self.log('Spider closed.')

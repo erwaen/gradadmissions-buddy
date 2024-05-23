@@ -85,7 +85,7 @@ Ejemplo de cómo podría verse un archivo JSON para la Universidad de Chicago:
     ...
 ]
 ```
-## Iniciar el Microservicio
+### Iniciar el Microservicio
 
 ### Prerrequisitos
 
@@ -93,18 +93,43 @@ Ejemplo de cómo podría verse un archivo JSON para la Universidad de Chicago:
 - FastAPI
 - Uvicorn
 
-### Instalación de Dependencias
-
-Asegúrate de que todas las dependencias estén instaladas. Si aún no lo has hecho, ejecuta:
-
-```bash
-pip3 install -r requirements.txt
-```
-
 ### Para iniciar el microservicio, utiliza el siguiente comando:
 
 ```bash
 uvicorn main:app --reload
+```
+## Endpoints
+
+### Descripción
+
+Esta API permite enviar datos scrapeados, dividir los datos en chunks y enviarlos a un microservicio para su inserción en una base de datos vectorizada.
+
+## Endpoints
+
+| Método | Endpoint                              | Descripción                                                                 | Ejemplo de Input                                     | Ejemplo de Output                                                    |
+|--------|---------------------------------------|-----------------------------------------------------------------------------|------------------------------------------------------|----------------------------------------------------------------------|
+| POST   | `/universidades/`                     | Obtener documentos basados en el ID proporcionado                           | `{ "id": 1 }`                                        | `{ "document": {...} }`                                              |
+| POST   | `/universidades/consulta-titulo/`     | Buscar documentos en múltiples archivos JSON que contienen el título        | `{ "title": "The University of Chicago: Graduate Studies" }` | `[ { "title": "The University of Chicago: Graduate Studies", "content": "Contenido 1" } ]` |
+| GET    | `/universidades/list`                 | Listar todas las universidades disponibles en el directorio "archivos_json" | N/A                                                  | `[ { "id": "1", "name": "University 1" }, { "id": "2", "name": "University 2" } ]` |
+| POST   | `/enviar-datos/`                      | Leer datos de múltiples archivos JSON y enviarlos a un microservicio        | `{}`                                                 | `{ "message": "Datos scrapeados enviados correctamente al microservicio" }` |
+
+### Ejemplos de usos:
+#### 1. `/universidades/`
+```bash
+curl -X POST http://localhost:8000/universidades/ -H "Content-Type: application/json" -d '{"id": 1}'
+```
+#### 2. `/universidades/consulta-titulo/`
+```bash
+curl -X POST http://localhost:8000/universidades/consulta-titulo/ -H "Content-Type: application/json" -d '{"title": "The University of Chicago: Graduate Studies"}'
+```
+
+#### 3. `/universidades/list/`
+```bash
+curl http://localhost:8000/universidades/list
+  ```
+#### 4. `/enviar-datos/`
+```bash
+curl -X POST http://localhost:8000/enviar-datos/ -H "Content-Type: application/json" -d '{}'
 ```
 
 

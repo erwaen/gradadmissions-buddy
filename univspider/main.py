@@ -2,19 +2,39 @@ import json
 import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Dict
 import glob
-import uvicorn
+from fastapi.responses import FileResponse
+import zipfile
+import requests
+
 class GetDocumentosIN (BaseModel):
     id: int
-    desde: int
-    hasta: int
     
 class QueryRequest(BaseModel):
     id: int
     title: str
     
+class DataInsertionError(Exception):
+    """Raised when there is an error inserting data into the microservice."""
+    pass
+
 app = FastAPI()
+
+# Archivo temporal para almacenar el buffer
+buffer_file = "data.json"
+archivo_chunk= "archivos_chunk"
+data_file = 'data.json'
+output_file = 'out.json'
+chunk_size = 10
+
+class Universidad(BaseModel):
+    id: int
+    date: str
+    url: str
+    university_name: str
+    title: str
+    content: str
 
 def read_json_file(university_id):
     filename = f'archivos_json/university_{university_id}.json'
@@ -22,6 +42,15 @@ def read_json_file(university_id):
         with open(filename, 'r', encoding='utf-8') as f:
             return json.load(f)
     return None
+
+def get_university_name(university_id: int) -> str:
+    folder_path = f"dataset/university{university_id}"
+    json_files = glob.glob(os.path.join(folder_path, "documento*.json"))
+    if not json_files:
+        return "Unknown"
+    with open(json_files[0], "r", encoding="utf-8") as f:
+        data = json.load(f)
+        return data.get("university_name", "Unknown")
 
 @app.get("/")
 async def root():
@@ -33,25 +62,7 @@ async def get_documentos(body: GetDocumentosIN):
     if not documentos:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    if body.desde is not None and body.hasta is not None:
-        documentos = documentos[body.desde:body.hasta]
     return documentos
-
-@app.post("/universidades/consulta/")
-async def query_university(request: QueryRequest):
-    id = request.id
-    title = request.title
-    try:
-        with open(f"archivos_json/university_{id}.json", "r", encoding="utf-8") as file:
-            data = json.load(file)
-
-        for item in data:
-            if "title" in item and item["title"] == title:
-                return item
-        raise HTTPException(status_code=404, detail="Title not found")
-    
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="University not found")
 
 @app.post("/universidades/consulta-titulo/")
 async def query_title(title: str):
@@ -69,6 +80,45 @@ async def query_title(title: str):
         return results
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="No documents found")
+    
+@app.get("/universidades/list", response_model=List[Dict[str, str]])
+async def list_universidades():
+    universidades = []
+    for folder_name in os.listdir("dataset"):
+        if folder_name.startswith("university"):
+            university_id = folder_name[len("university"):]
+            university_name = get_university_name(university_id)
+            universidades.append({"id": university_id, "name": university_name})
+    if not universidades:
+        raise HTTPException(status_code=404, detail="No universities found")
+    return universidades
 
+@app.post("/enviar-datos/")
+async def enviar_datos():
+    try:
+        data = []
+        # Leer los datos scrapeados de los 10 archivos JSON correspondientes a las universidades
+        for i in range(1, 11):
+            filename = f"archivos_json/university_{i}.json"
+            with open(filename, "r", encoding="utf-8") as f:
+                data.extend(json.load(f))
+                
+        # Guardar los datos en el archivo buffer
+        with open(buffer_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            
+        # Enviar los datos scrapeados al microservicio
+        url_microservicio = "http://localhost:69/buffer/insert-data/"
+        response = requests.post(url_microservicio, json=data)
+
+        if response.status_code == 200:
+            return {"message": "Datos scrapeados enviados correctamente al microservicio"}
+        else:
+            raise HTTPException(status_code=response.status_code, detail="Error al enviar los datos al microservicio")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=81, reload=False)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=81)
