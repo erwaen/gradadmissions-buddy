@@ -82,9 +82,30 @@ async def buffer_insert_data(new_data: List[UniversityData]):
         json.dump(newBufferWithoutDuplicates,json_file)
     return {"message":"Buffer updated successfully"}
 
-@app.post("/retrieve-data/")
+@app.post("/retrieve/crawler")
 async def retrieve_data():
-    for i in range(1,9):
-        requests.post("localhost:8080")
+    for i in range(1, 9):
+        response = requests.post("http://univspider:81/universidades/", json={"id": i, "desde": 0, "hasta": 10})
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Insert data into buffer
+            buffer_response = requests.post("http://localhost:69/buffer/insert-data/", json=data)
+            if buffer_response.status_code != 200:
+                raise HTTPException(status_code=buffer_response.status_code, detail="Failed to insert data into buffer")
+        else:
+            return {"message": f"Failed to retrieve data for university id {i}", "status_code": response.status_code}
+    
+    # Split data after all data has been inserted into the buffer
+    split_response = requests.post("http://localhost:69/split-data/")
+    if split_response.status_code != 200:
+        raise HTTPException(status_code=split_response.status_code, detail="Failed to split data")
+    
+    # Insert data into Weaviate after splitting
+    insert_response = requests.post("http://localhost:69/insert-data/")
+    if insert_response.status_code != 200:
+        raise HTTPException(status_code=insert_response.status_code, detail="Failed to insert data into Weaviate")
+
+    return {"message": "Data retrieved, processed, and inserted successfully"}
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=80, reload=False)
