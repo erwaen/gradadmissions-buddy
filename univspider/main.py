@@ -71,4 +71,4 @@ async def query_title(title: str):
         raise HTTPException(status_code=404, detail="No documents found")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=80, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=81, reload=False)

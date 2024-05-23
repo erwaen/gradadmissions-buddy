@@ -11,7 +11,7 @@ import os
 import json
 from models import UniversityData
 import jsonSplitter
-
+import requests
 # Load environment variables
 load_dotenv()
 
@@ -79,5 +79,9 @@ async def buffer_insert_data(new_data: List[UniversityData]):
     with open("data.json","w",encoding="utf-8") as json_file:
         json.dump(newBufferWithoutDuplicates,json_file)
     return {"message":"Buffer updated successfully"}
+@app.post("/retrieve-data/")
+async def retrieve_data():
+    for i in range(1,9):
+        requests.post("localhost:8080")
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=80, reload=False)

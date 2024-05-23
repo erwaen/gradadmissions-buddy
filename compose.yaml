@@ -61,12 +61,12 @@ services:
       context: ./backend
     image: univspider_img
     volumes:
-      - ./backend:/usr/src/app/
+      - ./univspider:/usr/src/app/
     env_file:
       - ./backend/.env
     command: python main.py
     ports:
-      - "420:80"
+      - "420:81"
     networks:
       - app-network
 networks:
