@@ -32,6 +32,8 @@ services:
     # Configuración del servicio Weaviate
   contextionary:
     # Configuración del servicio Contextionary
+  univspider:
+    # Configuracion del servicio univspider
 networks:
   app-network:
     driver: bridge
