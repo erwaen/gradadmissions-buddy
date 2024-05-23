@@ -110,22 +110,6 @@ class UniversitySpider(scrapy.Spider):
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-    def save_item(self, item, university_id):
-        directory = f'dataset/university{university_id}'
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-
-        if university_id not in self.document_counter:
-            self.document_counter[university_id] = 1
-        else:
-            self.document_counter[university_id] += 1
-
-        document_number = self.document_counter[university_id]
-        filename = f'{directory}/documento{document_number}.json'
-
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(item, f, ensure_ascii=False, indent=2)
-
     def closed(self, reason):
         self.log('Spider closed.')
     
