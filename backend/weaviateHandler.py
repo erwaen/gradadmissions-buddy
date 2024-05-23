@@ -95,7 +95,7 @@ def insert_into_weaviate(json_file, weaviate_url):
         try:
             data = json.load(file)
         except json.JSONDecodeError:#Perdon por este parche feo xd
-            raise "No elements in splitted buffer to insert, did you forget split the data?"
+            return "No elements in splitted buffer to insert, did you forget split the data?"
     for entry in data:
         properties = {
             "url": entry['url'],
@@ -110,3 +110,4 @@ def insert_into_weaviate(json_file, weaviate_url):
         uuid = entry['id']
 
         client.data_object.create(properties, "UniversityData", uuid=uuid)
+    return {"message": "Data inserted into Weaviate successfully"}

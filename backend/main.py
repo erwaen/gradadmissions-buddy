@@ -45,12 +45,14 @@ async def process_data():
 async def insert_data():
     weaviate_url = "http://weaviate:8080"
     json_file = 'out.json'
-    weaviateHandler.insert_into_weaviate(json_file, weaviate_url)
+    ret = weaviateHandler.insert_into_weaviate(json_file, weaviate_url)
+    if ret != {"message": "Data inserted into Weaviate successfully"}:
+        raise HTTPException(status_code=500, detail=ret)
     open(json_file, 'w').close() #Limpiamos out.json
     open('data.json', 'w').close() #Limpiamos data.json
     dataJson = open('data.json','w')
     dataJson.write('[]')
-    return {"message": "Data inserted into Weaviate successfully"}
+    return ret
 
 
 
@@ -79,6 +81,7 @@ async def buffer_insert_data(new_data: List[UniversityData]):
     with open("data.json","w",encoding="utf-8") as json_file:
         json.dump(newBufferWithoutDuplicates,json_file)
     return {"message":"Buffer updated successfully"}
+
 @app.post("/retrieve-data/")
 async def retrieve_data():
     for i in range(1,9):
