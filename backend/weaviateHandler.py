@@ -13,7 +13,7 @@ def query_weaviate(prompt, top_n=5):
         .do()
     
     enriched_results = []
-
+    print(result)
     for item in result['data']['Get']['UniversityData']:
         enriched_item = item.copy()
 

@@ -59,9 +59,17 @@ async def buffer_insert_data(new_data: List[UniversityData]):
     # print(new_data)
     payloadDict = [dict(item) for item in new_data]
     # res = json.dumps(toDict)
-    with open("data.json","r",encoding="utf-8") as json_file:
-        bufferInFile = json.load(json_file)
-        bufferInFileDict = [dict (item) for item in bufferInFile]
+    try:
+        with open("data.json","r",encoding="utf-8") as json_file:
+            bufferInFile = json.load(json_file)
+            bufferInFileDict = [dict (item) for item in bufferInFile]
+    except:
+        dataJson = open('data.json','w')
+        dataJson.write('[]')
+        dataJson.close()
+        with open("data.json","r",encoding="utf-8") as json_file:
+            bufferInFile = json.load(json_file)
+            bufferInFileDict = [dict (item) for item in bufferInFile]
     for item in payloadDict:
         bufferInFileDict.append(item) 
     newBufferWithoutDuplicates = []
@@ -70,6 +78,6 @@ async def buffer_insert_data(new_data: List[UniversityData]):
             newBufferWithoutDuplicates.append(elem)
     with open("data.json","w",encoding="utf-8") as json_file:
         json.dump(newBufferWithoutDuplicates,json_file)
-    return {"message":"Buffer updated succesfully"}
+    return {"message":"Buffer updated successfully"}
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=80, reload=False)
