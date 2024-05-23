@@ -1,3 +1,5 @@
+Here is the updated `README.md` documentation for your project with all required sections.
+
 # gradadmissions-buddy
 
 ## Descripción del Proyecto
@@ -13,6 +15,7 @@ El proyecto se despliega utilizando Docker y Docker Compose. Para iniciar la apl
 - **backend_db**: Este servicio ejecuta la aplicación FastAPI que gestiona los endpoints para procesar y almacenar datos.
 - **weaviate**: Una base de datos vectorial utilizada para almacenar y consultar datos procesados.
 - **contextionary**: Proporciona servicios de vectorización para Weaviate.
+- **Univspider**: Proporciona servicios de web-scraping mediante FastAPI.
 
 ### Comandos para Levantar el Proyecto
 
@@ -33,7 +36,7 @@ services:
   contextionary:
     # Configuración del servicio Contextionary
   univspider:
-    # Configuracion del servicio univspider
+    # Configuración del servicio univspider
 networks:
   app-network:
     driver: bridge
@@ -41,26 +44,26 @@ networks:
 
 ## Sección 2: Endpoints de la API
 
-### `/get-data/` (GET)
+### `/buffer/insert-data/` (POST)
 
-Solicita datos del crawler y los guarda en `data.json`.
+Inserta datos en el buffer para su posterior procesamiento.
 
-| Método | Endpoint    | Descripción                          | Ejemplo de Input  | Ejemplo de Output |
-|--------|-------------|--------------------------------------|-------------------|-------------------|
-| GET    | /get-data/  | Solicita datos del crawler           | N/A               | No implementado   |
+| Método | Endpoint              | Descripción                           | Ejemplo de Input         | Ejemplo de Output                   |
+|--------|-----------------------|---------------------------------------|--------------------------|-------------------------------------|
+| POST   | /buffer/insert-data/  | Inserta datos en el buffer            | `[{"url": "http://..."}]`| `{"message": "Buffer updated successfully"}`|
 
 Ejemplo de uso:
 ```bash
-curl -X GET http://localhost:69/get-data/
+curl -X POST http://localhost:69/buffer/insert-data/ -d '[{"url": "http://example.com"}]'
 ```
 
 ### `/split-Data/` (POST)
 
-Procesa y divide los datos en chunks utilizando la clase `DataSplitter`.
+Procesa y divide en chunks a los datos que esten en el buffer.
 
-| Método | Endpoint      | Descripción                           | Ejemplo de Input            | Ejemplo de Output          |
-|--------|---------------|---------------------------------------|-----------------------------|----------------------------|
-| POST   | /split-Data/  | Procesa y divide los datos en chunks  | N/A                         | `{"message": "Data split"}`|
+| Método | Endpoint      | Descripción                           | Ejemplo de Input | Ejemplo de Output         |
+|--------|---------------|---------------------------------------|------------------|---------------------------|
+| POST   | /split-Data/  | Procesa y divide los datos en chunks  | N/A              | `{"message": "Data processed and split successfully"}"}`|
 
 Ejemplo de uso:
 ```bash
@@ -71,14 +74,29 @@ curl -X POST http://localhost:69/split-Data/
 
 Inserta datos procesados en Weaviate.
 
-| Método | Endpoint      | Descripción                            | Ejemplo de Input            | Ejemplo de Output          |
-|--------|---------------|----------------------------------------|-----------------------------|----------------------------|
-| POST   | /insert-Data/ | Inserta datos procesados en Weaviate   | N/A                         | `{"message": "Data inserted"}`|
+| Método | Endpoint      | Descripción                            | Ejemplo de Input | Ejemplo de Output            |
+|--------|---------------|----------------------------------------|------------------|------------------------------|
+| POST   | /insert-Data/ | Inserta datos procesados en Weaviate   | N/A              | `{"message": "Data inserted into Weaviate successfully"}`|
 
 Ejemplo de uso:
 ```bash
 curl -X POST http://localhost:69/insert-Data/
 ```
+
+### `/query/` (GET)
+
+Consulta la base de datos vectorial en Weaviate para obtener información basada en un prompt.
+
+| Método | Endpoint  | Descripción                                                | Ejemplo de Input                        | Ejemplo de Output                                                                                                         |
+|--------|-----------|------------------------------------------------------------|-----------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| GET    | /query/   | Realiza una consulta en Weaviate utilizando un prompt dado | `/query/?prompt=Harvard&n_items=1`      | `{"data": {"Get": {"UniversityData": [{"chunk_id": "123", "content": "example content", "url": "http://example.com"}]}}}` |
+
+Ejemplo de uso:
+```bash
+curl -X GET "http://localhost:69/query/?prompt=Harvard&n_items=1"
+```
+
+
 
 ## Sección 3: Funcionamiento del Proyecto
 
@@ -86,7 +104,7 @@ curl -X POST http://localhost:69/insert-Data/
 
 A continuación se muestra un diagrama de flujo creado con Excalidraw que ilustra los pasos del procesamiento de datos desde la entrada de un string hasta la respuesta de la API:
 
-![Diagrama de Flujo](https://drive.usercontent.google.com/u/0/uc?id=1lEG2lBW4hSVra9y34AY7iyB7BXb0Xn3_&export=download)
+![Diagrama de Flujo](https://drive.google.com/uc?id=1lEG2lBW4hSVra9y34AY7iyB7BXb0Xn3_)
 
 ### Estructura de los Datos en la DB Vectorizada
 
@@ -101,10 +119,28 @@ Los datos se almacenan en Weaviate en una estructura vectorial. Cada entrada con
 
 Cada chunk contiene un máximo de 100 caracteres.
 
-### Consulta al Crawler y Almacenamiento en la DB (Para mantenimiento de datos
+### Consulta al Crawler y Almacenamiento en la DB
 
 El proceso para conseguir los datos y almacenarlos en la DB vectorizada incluye los siguientes pasos:
 
-1. **Consulta al Crawler**: El endpoint `/get-data/` se diseñará para solicitar datos al crawler y almacenarlos en `data.json`.
+1. **Consulta al Crawler**: El endpoint `/get-data/` se diseña para solicitar datos al crawler y almacenarlos en `data.json`.
 2. **Procesamiento de Datos**: El endpoint `/split-Data/` utiliza la clase `DataSplitter` para dividir los datos en chunks manejables.
 3. **Inserción en Weaviate**: El endpoint `/insert-Data/` inserta los datos procesados en Weaviate.
+
+## Ejemplo de Uso
+
+```bash
+# Insertar datos en el buffer
+curl -X POST http://localhost:69/buffer/insert-data/ -d '[{"url": "http://example.com"}]'
+
+# Procesar y dividir datos
+curl -X POST http://localhost:69/split-Data/
+
+# Insertar datos procesados en Weaviate
+curl -X POST http://localhost:69/insert-Data/
+
+# Consultar datos en Weaviate
+curl -X GET "http://localhost:69/query/?prompt=Harvard&n_items=1"
+```
+
+Este `README.md` proporciona una visión general completa del proyecto, incluyendo cómo levantarlo con Docker, los detalles de los endpoints de la API y el flujo de funcionamiento del sistema.
