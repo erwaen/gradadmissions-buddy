@@ -1,48 +1,99 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import List
 import weaviate
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
+import weaviateHandler
+import jsonSplitter
 import os
+import json
+from models import UniversityData
+import requests
+import uvicorn
+# Load environment variables
 load_dotenv()
 
 app = FastAPI()
 
+# Initialize Weaviate client
+client = weaviate.Client(os.getenv('WEAVIATE_URL', 'http://weaviate:8080'))
 
-client = weaviate.Client('http://localhost:8080/')
-
-
+# Initialize OpenAI model
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 model = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model="gpt-3.5-turbo")
 
-class QueryInput(BaseModel):
-    query: str
+@app.get("/query/")
+async def query_response(prompt: str, n_items: int = 5):
+    return weaviateHandler.query_weaviate(prompt, n_items)
 
-class QueryOutput(BaseModel):
-    response: str
+# Endpoint to retrieve scrapped data from the crawler module
+@app.get("/get-data/")
+async def get_data():
+    raise NotImplementedError
 
-def retrieve_from_weaviate(query: str) -> str:
-    result = client.query.get("UniversityPage", ["content"]).with_near_text({
-        'concepts': [query]
-    }).do()
-    if result and result['data']['Get']['UniversityPage']:
-        return result['data']['Get']['UniversityPage'][0]['content']
-    else:
-        return ""
+# Endpoint to process and split data
+@app.post("/split-data/")
+async def process_data():
+    splitter = jsonSplitter.DataSplitter('data.json', 'out.json')
+    splitter.process_data()
+    return {"message": "Data processed and split successfully"}
 
-@app.post("/rag", response_model=QueryOutput)
-def rag_endpoint(input: QueryInput):
-    retrieved_content = retrieve_from_weaviate(input.query)
-    if not retrieved_content:
-        raise HTTPException(status_code=404, detail="No relevant data found in Weaviate.")
+# Endpoint to insert processed data into Weaviate
+@app.post("/insert-data/")
+async def insert_data():
+    weaviate_url = "http://weaviate:8080"
+    json_file = 'out.json'
+    ret = weaviateHandler.insert_into_weaviate(json_file, weaviate_url)
+    if ret != {"message": "Data inserted into Weaviate successfully"}:
+        raise HTTPException(status_code=500, detail=ret)
+    open(json_file, 'w').close()  # Limpiamos out.json
+    open('data.json', 'w').close()  # Limpiamos data.json
+    dataJson = open('data.json', 'w')
+    dataJson.write('[]')
+    return ret
 
+@app.post("/buffer/insert-data/")
+async def buffer_insert_data(new_data: List[UniversityData]):
+    payloadDict = [dict(item) for item in new_data]
+    try:
+        with open("data.json", "r", encoding="utf-8") as json_file:
+            bufferInFile = json.load(json_file)
+            bufferInFileDict = [dict(item) for item in bufferInFile]
+    except:
+        dataJson = open('data.json', 'w')
+        dataJson.write('[]')
+        dataJson.close()
+        with open("data.json", "r", encoding="utf-8") as json_file:
+            bufferInFile = json.load(json_file)
+            bufferInFileDict = [dict(item) for item in bufferInFile]
+    for item in payloadDict:
+        bufferInFileDict.append(item)
+    newBufferWithoutDuplicates = []
+    for elem in bufferInFileDict:
+        if elem not in newBufferWithoutDuplicates:
+            newBufferWithoutDuplicates.append(elem)
+    with open("data.json", "w", encoding="utf-8") as json_file:
+        json.dump(newBufferWithoutDuplicates, json_file)
+    return {"message": "Buffer updated successfully"}
 
-    combined_input = f"{retrieved_content}\n\n{input.query}"
-    response = combined_input
-    #response = model.invoke(combined_input)
+@app.post("/retrieve/crawler")
+async def retrieve_data():
+    for i in range(1, 9):
+        response = requests.post("http://univspider:81/universidades/", json={"id": i, "desde": 0, "hasta": 10})
+        if response.status_code == 200:
+            data = response.json()
+            buffer_insert_data(data)  # Directly call the buffer insert function
+        else:
+            return {"message": f"Failed to retrieve data for university id {i}", "status_code": response.status_code}
     
-    return QueryOutput(response=str(response))
+    # Split data after all data has been inserted into the buffer
+    process_data()  # Directly call the split data function
+    
+    # Insert data into Weaviate after splitting
+    insert_data()  # Directly call the insert data function
+
+    return {"message": "Data retrieved, processed, and inserted successfully"}
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=80,reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=80, reload=False)

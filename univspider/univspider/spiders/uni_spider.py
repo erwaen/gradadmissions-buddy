@@ -19,7 +19,7 @@ class UniversitySpider(scrapy.Spider):
         ("https://www.cs.rochester.edu/graduate/masters-program.html", "University of Rochester"),
         ("https://college.harvard.edu/admissions", "Harvard University"),
         ("https://www.stanford.edu/admission/", "Stanford University"),
-        ("https://www.upenn.edu/admissions","University of Pensylvania"),
+        ("https://www.upenn.edu/admissions","University of Pennsylvania")
     ]
     max_depth_per_university = 2
     visited_urls = set()
@@ -97,18 +97,23 @@ class UniversitySpider(scrapy.Spider):
         directory = 'archivos_json'
         if not os.path.exists(directory):
             os.makedirs(directory)
+
+            self.log(f"Created directory: {directory}")
+
         filename = f'{directory}/university_{university_id}.json'
-        if os.path.exists(filename):
-            with open(filename, 'r', encoding='utf-8') as f:
-                try:
-                    data = json.load(f)
-                except json.decoder.JSONDecodeError:
-                    data = []
+
+        if not os.path.exists(filename):
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump([item], f, ensure_ascii=False, indent=2)
+            self.log(f"Created new file: {filename}")
         else:
-            data = []
-        data.append(item)
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            with open(filename, 'r+', encoding='utf-8') as f:
+                data = json.load(f)
+                data.append(item)
+                f.seek(0)
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            self.log(f"Appended to existing file: {filename}")
+
 
     def closed(self, reason):
         self.log('Spider closed.')
