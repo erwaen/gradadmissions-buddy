@@ -97,6 +97,7 @@ class UniversitySpider(scrapy.Spider):
         directory = 'archivos_json'
         if not os.path.exists(directory):
             os.makedirs(directory)
+
             self.log(f"Created directory: {directory}")
 
         filename = f'{directory}/university_{university_id}.json'
@@ -112,6 +113,7 @@ class UniversitySpider(scrapy.Spider):
                 f.seek(0)
                 json.dump(data, f, ensure_ascii=False, indent=2)
             self.log(f"Appended to existing file: {filename}")
+
 
     def closed(self, reason):
         self.log('Spider closed.')
