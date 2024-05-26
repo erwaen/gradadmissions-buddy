@@ -3,7 +3,7 @@ import uuid
 class DataSplitter:
     """Class to handle splitting of large text data into smaller chunks."""
 
-    def __init__(self, input_file, output_file, chunk_size=100):
+    def __init__(self, input_file, output_file, chunk_size=350):
         
         # Initialize the DataSplitter with input/output file paths and chunk size.
         

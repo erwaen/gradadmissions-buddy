@@ -67,35 +67,35 @@ def insert_into_weaviate(wclient: WeaviateClient, json_file):
     # Initialize the Weaviate client
 
     # Ensure the class schema exists in Weaviate
-    class_obj = {
-        "class": "UniversityData",
-        "properties": [
-            {
-                "name": "url",
-                "dataType": ["string"]
-            },
-            {
-                "name": "university_name",
-                "dataType": ["string"]
-            },
-            {
-                "name": "content",
-                "dataType": ["text"]
-            },
-            {
-                "name": "chunk_id",
-                "dataType": ["uuid"]
-            },
-            {
-                "name": "previous_id",
-                "dataType": ["uuid"]
-            },
-            {
-                "name": "next_id",
-                "dataType": ["uuid"]
-            }
-        ]
-    }
+    # class_obj = {
+    #     "class": "UniversityData",
+    #     "properties": [
+    #         {
+    #             "name": "url",
+    #             "dataType": ["string"]
+    #         },
+    #         {
+    #             "name": "university_name",
+    #             "dataType": ["string"]
+    #         },
+    #         {
+    #             "name": "content",
+    #             "dataType": ["text"]
+    #         },
+    #         {
+    #             "name": "chunk_id",
+    #             "dataType": ["uuid"]
+    #         },
+    #         {
+    #             "name": "previous_id",
+    #             "dataType": ["uuid"]
+    #         },
+    #         {
+    #             "name": "next_id",
+    #             "dataType": ["uuid"]
+    #         }
+    #     ]
+    # }
 
     if not wclient.collections.exists(name="UniversityData"):
         _ = wclient.collections.create(
@@ -116,10 +116,17 @@ def insert_into_weaviate(wclient: WeaviateClient, json_file):
         except json.JSONDecodeError:#Perdon por este parche feo xd
             return "No elements in splitted buffer to insert, did you forget split the data?"
     counter = 0
-
+    list_properties = list()  
     for entry in data:
         counter+=1 
+        if counter % 1000 == 0 and counter != 0:
+            print("Inserting...")
+            university_collection.data.insert_many(list_properties)
+            list_properties = list()
         print(counter, len(data))
+        if university_collection.query.fetch_object_by_id(entry['id']):
+            print(f"data with id: {entry['id']}  already exist!")
+            continue
         properties = {
             "url": entry['url'],
             "university_name": entry['university_name'],
@@ -128,10 +135,13 @@ def insert_into_weaviate(wclient: WeaviateClient, json_file):
             "previous_id": entry['previous_id'],
             "next_id": entry['next_id']
         }
+        list_properties.append(properties)
 
-        # Use the existing UUID
-        uuid = entry['id']
+        # # Use the existing UUID
+        # uuid = entry['id']
 
-        university_collection.data.insert(properties=properties, uuid=uuid)
+
+
+    university_collection.data.insert_many(list_properties)
         # client.data_object.create(properties, "UniversityData", uuid=uuid)
     return {"message": "Data inserted into Weaviate successfully"}
