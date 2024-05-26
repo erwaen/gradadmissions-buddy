@@ -15,7 +15,8 @@ services:
     networks:
       - app-network
     depends_on:
-      - weaviate
+      weaviate:
+        condition: service_healthy
     environment:
       - WEAVIATE_URL=http://weaviate:8080
       - UNIVSPIDER_URL=http://univspider:81
@@ -35,6 +36,8 @@ services:
     volumes:
     - ./backend/weaviate_data:/var/lib/weaviate
     restart: on-failure:0
+    networks:
+      - app-network
     environment:
       OPENAI_APIKEY: $OPENAI_APIKEY
       QUERY_DEFAULTS_LIMIT: 25
@@ -43,6 +46,12 @@ services:
       DEFAULT_VECTORIZER_MODULE: 'text2vec-openai'
       ENABLE_MODULES: 'text2vec-openai'
       CLUSTER_HOSTNAME: 'node1'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/v1/.well-known/ready"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+
   # weaviate:
   #   command:
   #     - --host
@@ -103,3 +112,4 @@ services:
 networks:
   app-network:
     driver: bridge
+
