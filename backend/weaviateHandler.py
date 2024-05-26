@@ -1,49 +1,60 @@
-import weaviate
-import json 
+import json
+from typing import Dict
+from weaviate import Any 
+import weaviate.classes as wvc
+from weaviate.classes.query import Filter
 
-def query_weaviate(prompt, top_n=5):
-    # Initialize Weaviate client
-    weaviate_url = "http://weaviate:8080"  # Replace with your Weaviate instance URL
-    client = weaviate.Client(weaviate_url)
+from weaviate.client import WeaviateClient
 
+def query_weaviate(wclient: WeaviateClient, prompt: str, top_n: int=5):
     # Perform the initial vector search in Weaviate using contextionary
-    result = client.query.get("UniversityData", ["url", "university_name", "content", "next_id", "previous_id", "chunk_id"]) \
-        .with_near_text({"concepts": [prompt], "certainty": 0.7}) \
-        .with_limit(top_n) \
-        .do()
+    university_collection = wclient.collections.get("UniversityData")
+    result = university_collection.query.near_text(
+        query=prompt,
+        limit=5
+    )
+    # result = wclient.query.get("UniversityData", ["url", "university_name", "content", "next_id", "previous_id", "chunk_id"]) \
+    #     .with_near_text({"concepts": [prompt], "certainty": 0.7}) \
+    #     .with_limit(top_n) \
+    #     .do()
     
     enriched_results = []
     print(result)
-    for item in result['data']['Get']['UniversityData']:
+    for obj in result.objects:
+
+        item =  dict(obj.properties)
         enriched_item = item.copy()
 
         # Fetch previous chunk's content if it exists
         if item['previous_id']:
-            previous_result = client.query.get("UniversityData", ["content"]) \
-                .with_where({
-                    "path": ["chunk_id"],
-                    "operator": "Equal",
-                    "valueString": item['previous_id']
-                }) \
-                .do()
-            if previous_result['data']['Get']['UniversityData']:
-                enriched_item['previous_content'] = previous_result['data']['Get']['UniversityData'][0]['content']
-            else:
-                enriched_item['previous_content'] = None
+            # previous_result = university_collection.query.fetch_object_by_id(
+            #    str(item["previous_id"]) 
+            # )
+            previous_result = university_collection.query.fetch_objects(
+                    filters=Filter.by_property("chunk_id").equal(str(item['previous_id'])),
+                    limit=1
+            ).objects[0]
+
+            enriched_item['previous_content'] = None
+            if previous_result:
+                p_data = previous_result.properties
+                enriched_item['previous_content'] = p_data['content']
 
         # Fetch next chunk's content if it exists
         if item['next_id']:
-            next_result = client.query.get("UniversityData", ["content"]) \
-                .with_where({
-                    "path": ["chunk_id"],
-                    "operator": "Equal",
-                    "valueString": item['next_id']
-                }) \
-                .do()
-            if next_result['data']['Get']['UniversityData']:
-                enriched_item['next_content'] = next_result['data']['Get']['UniversityData'][0]['content']
-            else:
-                enriched_item['next_content'] = None
+
+            # next_result = university_collection.query.fetch_object_by_id(
+            #    str(item["next_id"]) 
+            # )
+            next_result = university_collection.query.fetch_objects(
+                    filters=Filter.by_property("chunk_id").equal(str(item['next_id'])),
+                    limit=1
+            ).objects[0]
+
+            enriched_item['next_content'] = None
+            if  next_result:
+                n_data = next_result.properties
+                enriched_item['next_content'] = n_data['content']
 
         enriched_results.append(enriched_item)
 
@@ -52,9 +63,8 @@ def query_weaviate(prompt, top_n=5):
 
 
 
-def insert_into_weaviate(json_file, weaviate_url):
+def insert_into_weaviate(wclient: WeaviateClient, json_file):
     # Initialize the Weaviate client
-    client = weaviate.Client(weaviate_url)
 
     # Ensure the class schema exists in Weaviate
     class_obj = {
@@ -87,8 +97,17 @@ def insert_into_weaviate(json_file, weaviate_url):
         ]
     }
 
-    if not client.schema.contains(class_obj):
-        client.schema.create_class(class_obj)
+    if not wclient.collections.exists(name="UniversityData"):
+        _ = wclient.collections.create(
+            name="UniversityData",
+            vectorizer_config=wvc.config.Configure.Vectorizer.text2vec_openai(),
+            generative_config=wvc.config.Configure.Generative.openai()
+        )
+
+    university_collection = wclient.collections.get(name="UniversityData")
+
+    # if not wclient.schema.contains(class_obj):
+    #     client.schema.create_class(class_obj)
 
     # Load data from JSON file
     with open(json_file, 'r', encoding='utf-8') as file:
@@ -96,7 +115,11 @@ def insert_into_weaviate(json_file, weaviate_url):
             data = json.load(file)
         except json.JSONDecodeError:#Perdon por este parche feo xd
             return "No elements in splitted buffer to insert, did you forget split the data?"
+    counter = 0
+
     for entry in data:
+        counter+=1 
+        print(counter, len(data))
         properties = {
             "url": entry['url'],
             "university_name": entry['university_name'],
@@ -109,5 +132,6 @@ def insert_into_weaviate(json_file, weaviate_url):
         # Use the existing UUID
         uuid = entry['id']
 
-        client.data_object.create(properties, "UniversityData", uuid=uuid)
+        university_collection.data.insert(properties=properties, uuid=uuid)
+        # client.data_object.create(properties, "UniversityData", uuid=uuid)
     return {"message": "Data inserted into Weaviate successfully"}
