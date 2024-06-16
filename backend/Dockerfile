@@ -11,5 +11,6 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 RUN chmod +x /usr/src/app/entrypoint.sh
-
+RUN apt update
+RUN apt install wget -y
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
