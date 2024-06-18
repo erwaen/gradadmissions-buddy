@@ -1,0 +1,23 @@
+# Usa una imagen base oficial de Python
+FROM python:3.11-slim-buster
+
+# Establece el directorio de trabajo en el contenedor
+WORKDIR /app
+
+# Copia los archivos de requisitos en el contenedor
+COPY requirements.txt requirements.txt
+
+# Instala las dependencias
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Instala chainlit
+RUN pip install chainlit
+
+# Copia el contenido de la aplicación en el contenedor
+COPY . .
+
+# Expone el puerto que la aplicación usará
+EXPOSE 8000
+
+# Define el comando por defecto para ejecutar la aplicación
+CMD ["chainlit", "run", "main.py"]
