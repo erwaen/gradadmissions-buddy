@@ -1,0 +1,1097 @@
+From 20a752ec253ad9bd81f5583b46fb0c31bcab1cb2 Mon Sep 17 00:00:00 2001
+From: JuliaRecalde <yuliantonia@gmail.com>
+Date: Tue, 18 Jun 2024 17:24:26 -0400
+Subject: [PATCH] add front
+
+---
+ .chainlit/config.toml                      | 121 +++++++++++
+ .chainlit/translations/en-US.json          | 231 +++++++++++++++++++++
+ chainlit.md                                |  14 ++
+ frontend/.chainlit/config.toml             | 121 +++++++++++
+ frontend/.chainlit/translations/en-US.json | 231 +++++++++++++++++++++
+ frontend/chainlit.md                       |  60 ++++++
+ frontend/docker-compose.yml                |  11 +
+ frontend/dockerfile                        |  23 ++
+ frontend/main.py                           | 105 ++++++++++
+ frontend/requirements.txt                  |  85 ++++++++
+ 10 files changed, 1002 insertions(+)
+ create mode 100644 .chainlit/config.toml
+ create mode 100644 .chainlit/translations/en-US.json
+ create mode 100644 chainlit.md
+ create mode 100644 frontend/.chainlit/config.toml
+ create mode 100644 frontend/.chainlit/translations/en-US.json
+ create mode 100644 frontend/chainlit.md
+ create mode 100644 frontend/docker-compose.yml
+ create mode 100644 frontend/dockerfile
+ create mode 100644 frontend/main.py
+ create mode 100644 frontend/requirements.txt
+
+diff --git a/.chainlit/config.toml b/.chainlit/config.toml
+new file mode 100644
+index 0000000..810b06f
+--- /dev/null
++++ b/.chainlit/config.toml
+@@ -0,0 +1,121 @@
++[project]
++# Whether to enable telemetry (default: true). No personal data is collected.
++enable_telemetry = true
++
++
++# List of environment variables to be provided by each user to use the app.
++user_env = []
++
++# Duration (in seconds) during which the session is saved when the connection is lost
++session_timeout = 3600
++
++# Enable third parties caching (e.g LangChain cache)
++cache = false
++
++# Authorized origins
++allow_origins = ["*"]
++
++# Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
++# follow_symlink = false
++
++[features]
++# Show the prompt playground
++prompt_playground = true
++
++# Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
++unsafe_allow_html = false
++
++# Process and display mathematical expressions. This can clash with "$" characters in messages.
++latex = false
++
++# Automatically tag threads with the current chat profile (if a chat profile is used)
++auto_tag_thread = true
++
++# Authorize users to spontaneously upload files with messages
++[features.spontaneous_file_upload]
++    enabled = true
++    accept = ["*/*"]
++    max_files = 20
++    max_size_mb = 500
++
++[features.audio]
++    # Threshold for audio recording
++    min_decibels = -45
++    # Delay for the user to start speaking in MS
++    initial_silence_timeout = 3000
++    # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
++    silence_timeout = 1500
++    # Above this duration (MS), the recording will forcefully stop.
++    max_duration = 15000
++    # Duration of the audio chunks in MS
++    chunk_duration = 1000
++    # Sample rate of the audio
++    sample_rate = 44100
++
++[UI]
++# Name of the app and chatbot.
++name = "Chatbot"
++
++# Show the readme while the thread is empty.
++show_readme_as_default = true
++
++# Description of the app and chatbot. This is used for HTML tags.
++# description = ""
++
++# Large size content are by default collapsed for a cleaner ui
++default_collapse_content = true
++
++# The default value for the expand messages settings.
++default_expand_messages = false
++
++# Hide the chain of thought details from the user in the UI.
++hide_cot = false
++
++# Link to your github repo. This will add a github button in the UI's header.
++# github = ""
++
++# Specify a CSS file that can be used to customize the user interface.
++# The CSS file can be served from the public directory or via an external link.
++# custom_css = "/public/test.css"
++
++# Specify a Javascript file that can be used to customize the user interface.
++# The Javascript file can be served from the public directory.
++# custom_js = "/public/test.js"
++
++# Specify a custom font url.
++# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
++
++# Specify a custom meta image url.
++# custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
++
++# Specify a custom build directory for the frontend.
++# This can be used to customize the frontend code.
++# Be careful: If this is a relative path, it should not start with a slash.
++# custom_build = "./public/build"
++
++[UI.theme]
++    #layout = "wide"
++    #font_family = "Inter, sans-serif"
++# Override default MUI light theme. (Check theme.ts)
++[UI.theme.light]
++    #background = "#FAFAFA"
++    #paper = "#FFFFFF"
++
++    [UI.theme.light.primary]
++        #main = "#F80061"
++        #dark = "#980039"
++        #light = "#FFE7EB"
++
++# Override default MUI dark theme. (Check theme.ts)
++[UI.theme.dark]
++    #background = "#FAFAFA"
++    #paper = "#FFFFFF"
++
++    [UI.theme.dark.primary]
++        #main = "#F80061"
++        #dark = "#980039"
++        #light = "#FFE7EB"
++
++
++[meta]
++generated_by = "1.1.202"
+diff --git a/.chainlit/translations/en-US.json b/.chainlit/translations/en-US.json
+new file mode 100644
+index 0000000..0bca720
+--- /dev/null
++++ b/.chainlit/translations/en-US.json
+@@ -0,0 +1,231 @@
++{
++    "components": {
++        "atoms": {
++            "buttons": {
++                "userButton": {
++                    "menu": {
++                        "settings": "Settings",
++                        "settingsKey": "S",
++                        "APIKeys": "API Keys",
++                        "logout": "Logout"
++                    }
++                }
++            }
++        },
++        "molecules": {
++            "newChatButton": {
++                "newChat": "New Chat"
++            },
++            "tasklist": {
++                "TaskList": {
++                    "title": "\ud83d\uddd2\ufe0f Task List",
++                    "loading": "Loading...",
++                    "error": "An error occured"
++                }
++            },
++            "attachments": {
++                "cancelUpload": "Cancel upload",
++                "removeAttachment": "Remove attachment"
++            },
++            "newChatDialog": {
++                "createNewChat": "Create new chat?",
++                "clearChat": "This will clear the current messages and start a new chat.",
++                "cancel": "Cancel",
++                "confirm": "Confirm"
++            },
++            "settingsModal": {
++                "settings": "Settings",
++                "expandMessages": "Expand Messages",
++                "hideChainOfThought": "Hide Chain of Thought",
++                "darkMode": "Dark Mode"
++            },
++            "detailsButton": {
++                "using": "Using",
++                "running": "Running",
++                "took_one": "Took {{count}} step",
++                "took_other": "Took {{count}} steps"
++            },
++            "auth": {
++                "authLogin": {
++                    "title": "Login to access the app.",
++                    "form": {
++                        "email": "Email address",
++                        "password": "Password",
++                        "noAccount": "Don't have an account?",
++                        "alreadyHaveAccount": "Already have an account?",
++                        "signup": "Sign Up",
++                        "signin": "Sign In",
++                        "or": "OR",
++                        "continue": "Continue",
++                        "forgotPassword": "Forgot password?",
++                        "passwordMustContain": "Your password must contain:",
++                        "emailRequired": "email is a required field",
++                        "passwordRequired": "password is a required field"
++                    },
++                    "error": {
++                        "default": "Unable to sign in.",
++                        "signin": "Try signing in with a different account.",
++                        "oauthsignin": "Try signing in with a different account.",
++                        "redirect_uri_mismatch": "The redirect URI is not matching the oauth app configuration.",
++                        "oauthcallbackerror": "Try signing in with a different account.",
++                        "oauthcreateaccount": "Try signing in with a different account.",
++                        "emailcreateaccount": "Try signing in with a different account.",
++                        "callback": "Try signing in with a different account.",
++                        "oauthaccountnotlinked": "To confirm your identity, sign in with the same account you used originally.",
++                        "emailsignin": "The e-mail could not be sent.",
++                        "emailverify": "Please verify your email, a new email has been sent.",
++                        "credentialssignin": "Sign in failed. Check the details you provided are correct.",
++                        "sessionrequired": "Please sign in to access this page."
++                    }
++                },
++                "authVerifyEmail": {
++                    "almostThere": "You're almost there! We've sent an email to ",
++                    "verifyEmailLink": "Please click on the link in that email to complete your signup.",
++                    "didNotReceive": "Can't find the email?",
++                    "resendEmail": "Resend email",
++                    "goBack": "Go Back",
++                    "emailSent": "Email sent successfully.",
++                    "verifyEmail": "Verify your email address"
++                },
++                "providerButton": {
++                    "continue": "Continue with {{provider}}",
++                    "signup": "Sign up with {{provider}}"
++                },
++                "authResetPassword": {
++                    "newPasswordRequired": "New password is a required field",
++                    "passwordsMustMatch": "Passwords must match",
++                    "confirmPasswordRequired": "Confirm password is a required field",
++                    "newPassword": "New password",
++                    "confirmPassword": "Confirm password",
++                    "resetPassword": "Reset Password"
++                },
++                "authForgotPassword": {
++                    "email": "Email address",
++                    "emailRequired": "email is a required field",
++                    "emailSent": "Please check the email address {{email}} for instructions to reset your password.",
++                    "enterEmail": "Enter your email address and we will send you instructions to reset your password.",
++                    "resendEmail": "Resend email",
++                    "continue": "Continue",
++                    "goBack": "Go Back"
++                }
++            }
++        },
++        "organisms": {
++            "chat": {
++                "history": {
++                    "index": {
++                        "showHistory": "Show history",
++                        "lastInputs": "Last Inputs",
++                        "noInputs": "Such empty...",
++                        "loading": "Loading..."
++                    }
++                },
++                "inputBox": {
++                    "input": {
++                        "placeholder": "Type your message here..."
++                    },
++                    "speechButton": {
++                        "start": "Start recording",
++                        "stop": "Stop recording"
++                    },
++                    "SubmitButton": {
++                        "sendMessage": "Send message",
++                        "stopTask": "Stop Task"
++                    },
++                    "UploadButton": {
++                        "attachFiles": "Attach files"
++                    },
++                    "waterMark": {
++                        "text": "Built with"
++                    }
++                },
++                "Messages": {
++                    "index": {
++                        "running": "Running",
++                        "executedSuccessfully": "executed successfully",
++                        "failed": "failed",
++                        "feedbackUpdated": "Feedback updated",
++                        "updating": "Updating"
++                    }
++                },
++                "dropScreen": {
++                    "dropYourFilesHere": "Drop your files here"
++                },
++                "index": {
++                    "failedToUpload": "Failed to upload",
++                    "cancelledUploadOf": "Cancelled upload of",
++                    "couldNotReachServer": "Could not reach the server",
++                    "continuingChat": "Continuing previous chat"
++                },
++                "settings": {
++                    "settingsPanel": "Settings panel",
++                    "reset": "Reset",
++                    "cancel": "Cancel",
++                    "confirm": "Confirm"
++                }
++            },
++            "threadHistory": {
++                "sidebar": {
++                    "filters": {
++                        "FeedbackSelect": {
++                            "feedbackAll": "Feedback: All",
++                            "feedbackPositive": "Feedback: Positive",
++                            "feedbackNegative": "Feedback: Negative"
++                        },
++                        "SearchBar": {
++                            "search": "Search"
++                        }
++                    },
++                    "DeleteThreadButton": {
++                        "confirmMessage": "This will delete the thread as well as it's messages and elements.",
++                        "cancel": "Cancel",
++                        "confirm": "Confirm",
++                        "deletingChat": "Deleting chat",
++                        "chatDeleted": "Chat deleted"
++                    },
++                    "index": {
++                        "pastChats": "Past Chats"
++                    },
++                    "ThreadList": {
++                        "empty": "Empty...",
++                        "today": "Today",
++                        "yesterday": "Yesterday",
++                        "previous7days": "Previous 7 days",
++                        "previous30days": "Previous 30 days"
++                    },
++                    "TriggerButton": {
++                        "closeSidebar": "Close sidebar",
++                        "openSidebar": "Open sidebar"
++                    }
++                },
++                "Thread": {
++                    "backToChat": "Go back to chat",
++                    "chatCreatedOn": "This chat was created on"
++                }
++            },
++            "header": {
++                "chat": "Chat",
++                "readme": "Readme"
++            }
++        }
++    },
++    "hooks": {
++        "useLLMProviders": {
++            "failedToFetchProviders": "Failed to fetch providers:"
++        }
++    },
++    "pages": {
++        "Design": {},
++        "Env": {
++            "savedSuccessfully": "Saved successfully",
++            "requiredApiKeys": "Required API Keys",
++            "requiredApiKeysInfo": "To use this app, the following API keys are required. The keys are stored on your device's local storage."
++        },
++        "Page": {
++            "notPartOfProject": "You are not part of this project."
++        },
++        "ResumeButton": {
++            "resumeChat": "Resume Chat"
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/chainlit.md b/chainlit.md
+new file mode 100644
+index 0000000..4507ac4
+--- /dev/null
++++ b/chainlit.md
+@@ -0,0 +1,14 @@
++# Welcome to Chainlit! 🚀🤖
++
++Hi there, Developer! 👋 We're excited to have you on board. Chainlit is a powerful tool designed to help you prototype, debug and share applications built on top of LLMs.
++
++## Useful Links 🔗
++
++- **Documentation:** Get started with our comprehensive [Chainlit Documentation](https://docs.chainlit.io) 📚
++- **Discord Community:** Join our friendly [Chainlit Discord](https://discord.gg/k73SQ3FyUh) to ask questions, share your projects, and connect with other developers! 💬
++
++We can't wait to see what you create with Chainlit! Happy coding! 💻😊
++
++## Welcome screen
++
++To modify the welcome screen, edit the `chainlit.md` file at the root of your project. If you do not want a welcome screen, just leave this file empty.
+diff --git a/frontend/.chainlit/config.toml b/frontend/.chainlit/config.toml
+new file mode 100644
+index 0000000..810b06f
+--- /dev/null
++++ b/frontend/.chainlit/config.toml
+@@ -0,0 +1,121 @@
++[project]
++# Whether to enable telemetry (default: true). No personal data is collected.
++enable_telemetry = true
++
++
++# List of environment variables to be provided by each user to use the app.
++user_env = []
++
++# Duration (in seconds) during which the session is saved when the connection is lost
++session_timeout = 3600
++
++# Enable third parties caching (e.g LangChain cache)
++cache = false
++
++# Authorized origins
++allow_origins = ["*"]
++
++# Follow symlink for asset mount (see https://github.com/Chainlit/chainlit/issues/317)
++# follow_symlink = false
++
++[features]
++# Show the prompt playground
++prompt_playground = true
++
++# Process and display HTML in messages. This can be a security risk (see https://stackoverflow.com/questions/19603097/why-is-it-dangerous-to-render-user-generated-html-or-javascript)
++unsafe_allow_html = false
++
++# Process and display mathematical expressions. This can clash with "$" characters in messages.
++latex = false
++
++# Automatically tag threads with the current chat profile (if a chat profile is used)
++auto_tag_thread = true
++
++# Authorize users to spontaneously upload files with messages
++[features.spontaneous_file_upload]
++    enabled = true
++    accept = ["*/*"]
++    max_files = 20
++    max_size_mb = 500
++
++[features.audio]
++    # Threshold for audio recording
++    min_decibels = -45
++    # Delay for the user to start speaking in MS
++    initial_silence_timeout = 3000
++    # Delay for the user to continue speaking in MS. If the user stops speaking for this duration, the recording will stop.
++    silence_timeout = 1500
++    # Above this duration (MS), the recording will forcefully stop.
++    max_duration = 15000
++    # Duration of the audio chunks in MS
++    chunk_duration = 1000
++    # Sample rate of the audio
++    sample_rate = 44100
++
++[UI]
++# Name of the app and chatbot.
++name = "Chatbot"
++
++# Show the readme while the thread is empty.
++show_readme_as_default = true
++
++# Description of the app and chatbot. This is used for HTML tags.
++# description = ""
++
++# Large size content are by default collapsed for a cleaner ui
++default_collapse_content = true
++
++# The default value for the expand messages settings.
++default_expand_messages = false
++
++# Hide the chain of thought details from the user in the UI.
++hide_cot = false
++
++# Link to your github repo. This will add a github button in the UI's header.
++# github = ""
++
++# Specify a CSS file that can be used to customize the user interface.
++# The CSS file can be served from the public directory or via an external link.
++# custom_css = "/public/test.css"
++
++# Specify a Javascript file that can be used to customize the user interface.
++# The Javascript file can be served from the public directory.
++# custom_js = "/public/test.js"
++
++# Specify a custom font url.
++# custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
++
++# Specify a custom meta image url.
++# custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
++
++# Specify a custom build directory for the frontend.
++# This can be used to customize the frontend code.
++# Be careful: If this is a relative path, it should not start with a slash.
++# custom_build = "./public/build"
++
++[UI.theme]
++    #layout = "wide"
++    #font_family = "Inter, sans-serif"
++# Override default MUI light theme. (Check theme.ts)
++[UI.theme.light]
++    #background = "#FAFAFA"
++    #paper = "#FFFFFF"
++
++    [UI.theme.light.primary]
++        #main = "#F80061"
++        #dark = "#980039"
++        #light = "#FFE7EB"
++
++# Override default MUI dark theme. (Check theme.ts)
++[UI.theme.dark]
++    #background = "#FAFAFA"
++    #paper = "#FFFFFF"
++
++    [UI.theme.dark.primary]
++        #main = "#F80061"
++        #dark = "#980039"
++        #light = "#FFE7EB"
++
++
++[meta]
++generated_by = "1.1.202"
+diff --git a/frontend/.chainlit/translations/en-US.json b/frontend/.chainlit/translations/en-US.json
+new file mode 100644
+index 0000000..0bca720
+--- /dev/null
++++ b/frontend/.chainlit/translations/en-US.json
+@@ -0,0 +1,231 @@
++{
++    "components": {
++        "atoms": {
++            "buttons": {
++                "userButton": {
++                    "menu": {
++                        "settings": "Settings",
++                        "settingsKey": "S",
++                        "APIKeys": "API Keys",
++                        "logout": "Logout"
++                    }
++                }
++            }
++        },
++        "molecules": {
++            "newChatButton": {
++                "newChat": "New Chat"
++            },
++            "tasklist": {
++                "TaskList": {
++                    "title": "\ud83d\uddd2\ufe0f Task List",
++                    "loading": "Loading...",
++                    "error": "An error occured"
++                }
++            },
++            "attachments": {
++                "cancelUpload": "Cancel upload",
++                "removeAttachment": "Remove attachment"
++            },
++            "newChatDialog": {
++                "createNewChat": "Create new chat?",
++                "clearChat": "This will clear the current messages and start a new chat.",
++                "cancel": "Cancel",
++                "confirm": "Confirm"
++            },
++            "settingsModal": {
++                "settings": "Settings",
++                "expandMessages": "Expand Messages",
++                "hideChainOfThought": "Hide Chain of Thought",
++                "darkMode": "Dark Mode"
++            },
++            "detailsButton": {
++                "using": "Using",
++                "running": "Running",
++                "took_one": "Took {{count}} step",
++                "took_other": "Took {{count}} steps"
++            },
++            "auth": {
++                "authLogin": {
++                    "title": "Login to access the app.",
++                    "form": {
++                        "email": "Email address",
++                        "password": "Password",
++                        "noAccount": "Don't have an account?",
++                        "alreadyHaveAccount": "Already have an account?",
++                        "signup": "Sign Up",
++                        "signin": "Sign In",
++                        "or": "OR",
++                        "continue": "Continue",
++                        "forgotPassword": "Forgot password?",
++                        "passwordMustContain": "Your password must contain:",
++                        "emailRequired": "email is a required field",
++                        "passwordRequired": "password is a required field"
++                    },
++                    "error": {
++                        "default": "Unable to sign in.",
++                        "signin": "Try signing in with a different account.",
++                        "oauthsignin": "Try signing in with a different account.",
++                        "redirect_uri_mismatch": "The redirect URI is not matching the oauth app configuration.",
++                        "oauthcallbackerror": "Try signing in with a different account.",
++                        "oauthcreateaccount": "Try signing in with a different account.",
++                        "emailcreateaccount": "Try signing in with a different account.",
++                        "callback": "Try signing in with a different account.",
++                        "oauthaccountnotlinked": "To confirm your identity, sign in with the same account you used originally.",
++                        "emailsignin": "The e-mail could not be sent.",
++                        "emailverify": "Please verify your email, a new email has been sent.",
++                        "credentialssignin": "Sign in failed. Check the details you provided are correct.",
++                        "sessionrequired": "Please sign in to access this page."
++                    }
++                },
++                "authVerifyEmail": {
++                    "almostThere": "You're almost there! We've sent an email to ",
++                    "verifyEmailLink": "Please click on the link in that email to complete your signup.",
++                    "didNotReceive": "Can't find the email?",
++                    "resendEmail": "Resend email",
++                    "goBack": "Go Back",
++                    "emailSent": "Email sent successfully.",
++                    "verifyEmail": "Verify your email address"
++                },
++                "providerButton": {
++                    "continue": "Continue with {{provider}}",
++                    "signup": "Sign up with {{provider}}"
++                },
++                "authResetPassword": {
++                    "newPasswordRequired": "New password is a required field",
++                    "passwordsMustMatch": "Passwords must match",
++                    "confirmPasswordRequired": "Confirm password is a required field",
++                    "newPassword": "New password",
++                    "confirmPassword": "Confirm password",
++                    "resetPassword": "Reset Password"
++                },
++                "authForgotPassword": {
++                    "email": "Email address",
++                    "emailRequired": "email is a required field",
++                    "emailSent": "Please check the email address {{email}} for instructions to reset your password.",
++                    "enterEmail": "Enter your email address and we will send you instructions to reset your password.",
++                    "resendEmail": "Resend email",
++                    "continue": "Continue",
++                    "goBack": "Go Back"
++                }
++            }
++        },
++        "organisms": {
++            "chat": {
++                "history": {
++                    "index": {
++                        "showHistory": "Show history",
++                        "lastInputs": "Last Inputs",
++                        "noInputs": "Such empty...",
++                        "loading": "Loading..."
++                    }
++                },
++                "inputBox": {
++                    "input": {
++                        "placeholder": "Type your message here..."
++                    },
++                    "speechButton": {
++                        "start": "Start recording",
++                        "stop": "Stop recording"
++                    },
++                    "SubmitButton": {
++                        "sendMessage": "Send message",
++                        "stopTask": "Stop Task"
++                    },
++                    "UploadButton": {
++                        "attachFiles": "Attach files"
++                    },
++                    "waterMark": {
++                        "text": "Built with"
++                    }
++                },
++                "Messages": {
++                    "index": {
++                        "running": "Running",
++                        "executedSuccessfully": "executed successfully",
++                        "failed": "failed",
++                        "feedbackUpdated": "Feedback updated",
++                        "updating": "Updating"
++                    }
++                },
++                "dropScreen": {
++                    "dropYourFilesHere": "Drop your files here"
++                },
++                "index": {
++                    "failedToUpload": "Failed to upload",
++                    "cancelledUploadOf": "Cancelled upload of",
++                    "couldNotReachServer": "Could not reach the server",
++                    "continuingChat": "Continuing previous chat"
++                },
++                "settings": {
++                    "settingsPanel": "Settings panel",
++                    "reset": "Reset",
++                    "cancel": "Cancel",
++                    "confirm": "Confirm"
++                }
++            },
++            "threadHistory": {
++                "sidebar": {
++                    "filters": {
++                        "FeedbackSelect": {
++                            "feedbackAll": "Feedback: All",
++                            "feedbackPositive": "Feedback: Positive",
++                            "feedbackNegative": "Feedback: Negative"
++                        },
++                        "SearchBar": {
++                            "search": "Search"
++                        }
++                    },
++                    "DeleteThreadButton": {
++                        "confirmMessage": "This will delete the thread as well as it's messages and elements.",
++                        "cancel": "Cancel",
++                        "confirm": "Confirm",
++                        "deletingChat": "Deleting chat",
++                        "chatDeleted": "Chat deleted"
++                    },
++                    "index": {
++                        "pastChats": "Past Chats"
++                    },
++                    "ThreadList": {
++                        "empty": "Empty...",
++                        "today": "Today",
++                        "yesterday": "Yesterday",
++                        "previous7days": "Previous 7 days",
++                        "previous30days": "Previous 30 days"
++                    },
++                    "TriggerButton": {
++                        "closeSidebar": "Close sidebar",
++                        "openSidebar": "Open sidebar"
++                    }
++                },
++                "Thread": {
++                    "backToChat": "Go back to chat",
++                    "chatCreatedOn": "This chat was created on"
++                }
++            },
++            "header": {
++                "chat": "Chat",
++                "readme": "Readme"
++            }
++        }
++    },
++    "hooks": {
++        "useLLMProviders": {
++            "failedToFetchProviders": "Failed to fetch providers:"
++        }
++    },
++    "pages": {
++        "Design": {},
++        "Env": {
++            "savedSuccessfully": "Saved successfully",
++            "requiredApiKeys": "Required API Keys",
++            "requiredApiKeysInfo": "To use this app, the following API keys are required. The keys are stored on your device's local storage."
++        },
++        "Page": {
++            "notPartOfProject": "You are not part of this project."
++        },
++        "ResumeButton": {
++            "resumeChat": "Resume Chat"
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/frontend/chainlit.md b/frontend/chainlit.md
+new file mode 100644
+index 0000000..c496f1c
+--- /dev/null
++++ b/frontend/chainlit.md
+@@ -0,0 +1,60 @@
++# Bienvenido a gradadmissions-buddy
++
++## Descripción del Proyecto
++
++**gradadmissions-buddy** es tu asistente personal para obtener información sobre admisiones universitarias. Desarrollada por Julia Recalde y Carlos Troya, esta herramienta utiliza tecnología avanzada para ofrecerte respuestas precisas y contextuales a tus preguntas sobre universidades.
++
++## Cómo Usar la Aplicación
++
++### Consultar Información de Universidades
++
++Puedes hacer preguntas sobre diversas universidades, y **gradadmissions-buddy** te proporcionará información relevante extraída de múltiples fuentes web.
++
++#### Ejemplo de Pregunta:
++- **Usuario:** ¿Qué programas de posgrado ofrece la Universidad de Harvard?
++- **Respuesta:** La Universidad de Harvard ofrece una amplia gama de programas de posgrado, incluyendo...
++
++### Buscar Información Específica
++
++Si necesitas información específica sobre un programa o requisito de admisión, simplemente formula tu pregunta.
++
++#### Ejemplo de Pregunta:
++- **Usuario:** ¿Cuáles son los requisitos de admisión para el programa de MBA de Stanford?
++- **Respuesta:** Los requisitos de admisión para el programa de MBA de Stanford incluyen...
++
++### Consultar Rankings y Evaluaciones
++
++Puedes preguntar sobre los rankings de universidades y las evaluaciones de programas específicos.
++
++#### Ejemplo de Pregunta:
++- **Usuario:** ¿Cuál es el ranking de la Universidad de Oxford en ingeniería?
++- **Respuesta:** La Universidad de Oxford ocupa el puesto número...
++
++## Ejemplos de Uso
++
++### Consultar Programas
++```bash
++¿Qué programas de posgrado ofrece el MIT?
++```
++
++### Requisitos de Admisión
++```bash
++¿Cuáles son los requisitos de admisión para el MBA en Harvard?
++```
++
++### Rankings Universitarios
++```bash
++¿Cuál es el ranking de ingeniería en Stanford?
++```
++
++## Beneficios de Usar gradadmissions-buddy
++
++- **Información Actualizada:** Obtén la información más reciente y relevante sobre las admisiones universitarias.
++- **Fácil de Usar:** Simplemente formula tus preguntas y obtén respuestas precisas.
++- **Amplia Cobertura:** Cubre una gran cantidad de universidades y programas alrededor del mundo.
++
++## Contribuciones y Soporte
++
++Si tienes alguna pregunta, sugerencia o encuentras algún problema, no dudes en contactarnos.
++
++¡Gracias por usar **gradadmissions-buddy**! Esperamos que esta herramienta te sea de gran ayuda en tu búsqueda de información sobre admisiones universitarias.
+\ No newline at end of file
+diff --git a/frontend/docker-compose.yml b/frontend/docker-compose.yml
+new file mode 100644
+index 0000000..88bff54
+--- /dev/null
++++ b/frontend/docker-compose.yml
+@@ -0,0 +1,11 @@
++version: '3'
++services:
++  langchain-chainlit-chat-app:
++    image: langchain-chainlit-chat-app:latest
++    build: .
++    ports:
++      - "8000:8000"
++    env_file:
++      - .env
++    working_dir: /home/appuser/app/
++    command: ["chainlit", "run", "/home/appuser/app/demo_app/main.py"]
+diff --git a/frontend/dockerfile b/frontend/dockerfile
+new file mode 100644
+index 0000000..7e84431
+--- /dev/null
++++ b/frontend/dockerfile
+@@ -0,0 +1,23 @@
++# Usa una imagen base oficial de Python
++FROM python:3.11-slim-buster
++
++# Establece el directorio de trabajo en el contenedor
++WORKDIR /app
++
++# Copia los archivos de requisitos en el contenedor
++COPY requirements.txt requirements.txt
++
++# Instala las dependencias
++RUN pip install --no-cache-dir -r requirements.txt
++
++# Instala chainlit
++RUN pip install chainlit
++
++# Copia el contenido de la aplicación en el contenedor
++COPY . .
++
++# Expone el puerto que la aplicación usará
++EXPOSE 8000
++
++# Define el comando por defecto para ejecutar la aplicación
++CMD ["chainlit", "run", "main.py"]
+diff --git a/frontend/main.py b/frontend/main.py
+new file mode 100644
+index 0000000..9a06a92
+--- /dev/null
++++ b/frontend/main.py
+@@ -0,0 +1,105 @@
++import os
++import requests
++import chainlit as cl
++from openai import AsyncOpenAI
++
++client = AsyncOpenAI(api_key=os.environ["OPENAI_API_KEY"])
++
++settings = {
++    "model": "gpt-3.5-turbo",
++    "temperature": 0.7,
++    "max_tokens": 500,
++    "top_p": 1,
++    "frequency_penalty": 0,
++    "presence_penalty": 0,
++}
++augmentation_Settings = {
++    "model": "gpt-3.5-turbo",
++    "temperature": 0.7,
++    "max_tokens": 100,
++    "top_p": 1,
++    "frequency_penalty": 0,
++    "presence_penalty": 0
++}
++
++async def augment_prompt(original_prompt):
++    augmentation_prompt = f"Create a list of questions, (in english only), that complement the original question.{original_prompt}, the format must be [question1,question2,...]"
++    
++    response = await client.chat.completions.create(
++        messages=[{"role": "system", "content": "You are an assistant that helps to enhance user prompts."},
++                  {"role": "user", "content": augmentation_prompt}], **augmentation_Settings
++    )
++    augmented_prompt = response.choices[0].message.content
++    print("Augmented Questions:")
++    for i in augmented_prompt.split(','):
++        print(i)
++    return augmented_prompt.split(",")
++
++def fetch_content_data(prompt, n_items=20):
++    try:
++        response = requests.get('http://backend_db:82/query/', params={'prompt': prompt, 'n_items': n_items})
++        response.raise_for_status()
++        data = response.json()
++        return data
++    except requests.exceptions.RequestException as e:
++        cl.error(f"Failed to fetch content data: {e}")
++        return []
++
++def parse_content_data(data):
++    contents = []
++    for item in data:
++        content = item.get('content', '')
++        url = item.get('url', '')
++        if content and url:
++            contents.append(f"Content: {content}\nURL: {url}\n")
++
++    return '\n'.join(contents) if contents else "No relevant content found."
++
++@cl.on_chat_start
++def start_chat():
++    cl.user_session.set(
++        "message_history",
++        [{"role": "system", "content": "You are GradAdmissionsBuddy, a very helpful assistant that helps students find information about Universities as well as their application information. You only respond based on the data provided by the CONTENT field."}],
++    )
++
++@cl.on_message
++async def main(message: cl.Message):
++    user_query = message.content
++    message_history = cl.user_session.get("message_history")
++    
++    # Augment the user prompt using OpenAI
++    augmented_prompt = await augment_prompt(user_query)
++    content_data = list()
++    # Fetch and parse content data using the augmented prompt
++    for question in augmented_prompt:
++        raw_data = fetch_content_data(question)
++        content_data.append(parse_content_data(raw_data))
++    
++    # Add user prompt and fetched content data to the message history
++    user_message = f"CONTENT: {content_data}\n{user_query}"
++    message_history.append({"role": "user", "content": user_message})
++    print(user_message)
++    
++    # Initialize an empty message
++    msg = cl.Message(content="")
++    await msg.send()
++    
++    try:
++        # Create a chat completion request
++        stream = await client.chat.completions.create(
++            messages=message_history, stream=True, **settings
++        )
++        
++        # Stream the response tokens
++        async for part in stream:
++            if token := part.choices[0].delta.content or "":
++                await msg.stream_token(token)
++        
++        # Update message history with the assistant's response
++        message_history.append({"role": "assistant", "content": msg.content})
++        await msg.update()
++    except Exception as e:
++        cl.error(f"Failed to process the chat completion: {e}")
++
++    # Save the updated message history
++    cl.user_session.set("message_history", message_history)
+diff --git a/frontend/requirements.txt b/frontend/requirements.txt
+new file mode 100644
+index 0000000..4de57de
+--- /dev/null
++++ b/frontend/requirements.txt
+@@ -0,0 +1,85 @@
++aiofiles==23.2.1
++aiohttp==3.9.5
++aiosignal==1.3.1
++annotated-types==0.7.0
++anyio==3.7.1
++async-timeout==4.0.3
++asyncer==0.0.2
++attrs==23.2.0
++bidict==0.23.1
++certifi==2024.6.2
++chainlit==1.1.202
++charset-normalizer==3.3.2
++chevron==0.14.0
++click==8.1.7
++colorama==0.4.6
++dataclasses-json==0.5.14
++Deprecated==1.2.14
++distro==1.9.0
++exceptiongroup==1.2.1
++fastapi==0.110.3
++fastapi-socketio==0.0.10
++filetype==1.2.0
++frozenlist==1.4.1
++googleapis-common-protos==1.63.1
++greenlet==3.0.3
++grpcio==1.64.1
++h11==0.14.0
++httpcore==1.0.5
++httpx==0.27.0
++idna==3.7
++importlib_metadata==7.1.0
++jsonpatch==1.33
++jsonpointer==3.0.0
++langchain==0.2.3
++langchain-community==0.2.4
++langchain-core==0.2.5
++langchain-text-splitters==0.2.1
++langsmith==0.1.77
++Lazify==0.4.0
++literalai==0.0.601
++marshmallow==3.21.3
++multidict==6.0.5
++mypy-extensions==1.0.0
++nest-asyncio==1.6.0
++numpy==1.26.4
++openai==1.34.0
++opentelemetry-api==1.25.0
++opentelemetry-exporter-otlp==1.25.0
++opentelemetry-exporter-otlp-proto-common==1.25.0
++opentelemetry-exporter-otlp-proto-grpc==1.25.0
++opentelemetry-exporter-otlp-proto-http==1.25.0
++opentelemetry-instrumentation==0.46b0
++opentelemetry-proto==1.25.0
++opentelemetry-sdk==1.25.0
++opentelemetry-semantic-conventions==0.46b0
++orjson==3.10.4
++packaging==23.2
++protobuf==4.25.3
++pydantic==2.7.4
++pydantic_core==2.18.4
++PyJWT==2.8.0
++python-dotenv==1.0.1
++python-engineio==4.9.1
++python-multipart==0.0.9
++python-socketio==5.11.2
++PyYAML==6.0.1
++requests==2.32.3
++simple-websocket==1.0.0
++sniffio==1.3.1
++SQLAlchemy==2.0.30
++starlette==0.37.2
++syncer==2.0.3
++tenacity==8.3.0
++tomli==2.0.1
++tqdm==4.66.4
++typing-inspect==0.9.0
++typing_extensions==4.12.2
++uptrace==1.24.0
++urllib3==2.2.1
++uvicorn==0.25.0
++watchfiles==0.20.0
++wrapt==1.16.0
++wsproto==1.2.0
++yarl==1.9.4
++zipp==3.19.2
+\ No newline at end of file
+-- 
+2.34.1
+
