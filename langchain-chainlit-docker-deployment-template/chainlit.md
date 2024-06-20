@@ -2,54 +2,39 @@
 
 ## Descripción del Proyecto
 
-**gradadmissions-buddy** es tu asistente personal para obtener información sobre admisiones universitarias. Desarrollada por Julia Recalde y Carlos Troya, esta herramienta utiliza tecnología avanzada para ofrecerte respuestas precisas y contextuales a tus preguntas sobre universidades.
+**gradadmissions-buddy** es tu asistente personal para obtener información sobre programas de maestría en ciencias de la computación. Desarrollada por Julia Recalde y Carlos Troya, esta herramienta utiliza tecnología avanzada para ofrecerte respuestas precisas y contextuales a tus preguntas sobre universidades.
 
 ## Cómo Usar la Aplicación
 
 ### Consultar Información de Universidades
 
-Puedes hacer preguntas sobre diversas universidades, y **gradadmissions-buddy** te proporcionará información relevante extraída de múltiples fuentes web.
-
-#### Ejemplo de Pregunta:
-- **Usuario:** ¿Qué programas de posgrado ofrece la Universidad de Harvard?
-- **Respuesta:** La Universidad de Harvard ofrece una amplia gama de programas de posgrado, incluyendo...
+Puedes hacer preguntas sobre programas de maestría en ciencias de la computación en diversas universidades, y **gradadmissions-buddy** te proporcionará información relevante extraída de múltiples fuentes web.
 
 ### Buscar Información Específica
 
 Si necesitas información específica sobre un programa o requisito de admisión, simplemente formula tu pregunta.
 
-#### Ejemplo de Pregunta:
-- **Usuario:** ¿Cuáles son los requisitos de admisión para el programa de MBA de Stanford?
-- **Respuesta:** Los requisitos de admisión para el programa de MBA de Stanford incluyen...
-
 ### Consultar Rankings y Evaluaciones
 
 Puedes preguntar sobre los rankings de universidades y las evaluaciones de programas específicos.
 
-#### Ejemplo de Pregunta:
-- **Usuario:** ¿Cuál es el ranking de la Universidad de Oxford en ingeniería?
-- **Respuesta:** La Universidad de Oxford ocupa el puesto número...
+## Universidades Incluidas en gradadmissions-buddy
 
-## Ejemplos de Uso
-
-### Consultar Programas
-```bash
-¿Qué programas de posgrado ofrece el MIT?
-```
-
-### Requisitos de Admisión
-```bash
-¿Cuáles son los requisitos de admisión para el MBA en Harvard?
-```
-
-### Rankings Universitarios
-```bash
-¿Cuál es el ranking de ingeniería en Stanford?
-```
+Actualmente, **gradadmissions-buddy** cubre las siguientes universidades:
+1. University of Chicago
+2. Princeton University
+3. Cornell University
+4. Columbia University
+5. Johns Hopkins University
+6. University of Michigan
+7. University of Rochester
+8. Harvard University
+9. Stanford University
+10. University of Oxford
 
 ## Beneficios de Usar gradadmissions-buddy
 
-- **Información Actualizada:** Obtén la información más reciente y relevante sobre las admisiones universitarias.
+- **Información Actualizada:** Obtén la información más reciente y relevante sobre los programas de maestría en ciencias de la computación.
 - **Fácil de Usar:** Simplemente formula tus preguntas y obtén respuestas precisas.
 - **Amplia Cobertura:** Cubre una gran cantidad de universidades y programas alrededor del mundo.
 
@@ -57,4 +42,4 @@ Puedes preguntar sobre los rankings de universidades y las evaluaciones de progr
 
 Si tienes alguna pregunta, sugerencia o encuentras algún problema, no dudes en contactarnos.
 
-¡Gracias por usar **gradadmissions-buddy**! Esperamos que esta herramienta te sea de gran ayuda en tu búsqueda de información sobre admisiones universitarias.
+¡Gracias por usar **gradadmissions-buddy**! Esperamos que esta herramienta te sea de gran ayuda en tu búsqueda de información sobre programas de maestría en ciencias de la computación.
