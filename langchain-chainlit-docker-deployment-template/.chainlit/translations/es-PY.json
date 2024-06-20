@@ -1,0 +1,231 @@
+{
+    "components": {
+        "atoms": {
+            "buttons": {
+                "userButton": {
+                    "menu": {
+                        "settings": "Configuración",
+                        "settingsKey": "C",
+                        "APIKeys": "Claves API",
+                        "logout": "Cerrar sesión"
+                    }
+                }
+            }
+        },
+        "molecules": {
+            "newChatButton": {
+                "newChat": "Nuevo Chat"
+            },
+            "tasklist": {
+                "TaskList": {
+                    "title": "\ud83d\uddd2\ufe0f Lista de Tareas",
+                    "loading": "Cargando...",
+                    "error": "Ocurrió un error"
+                }
+            },
+            "attachments": {
+                "cancelUpload": "Cancelar subida",
+                "removeAttachment": "Eliminar adjunto"
+            },
+            "newChatDialog": {
+                "createNewChat": "¿Crear nuevo chat?",
+                "clearChat": "Esto borrará los mensajes actuales y comenzará un nuevo chat.",
+                "cancel": "Cancelar",
+                "confirm": "Confirmar"
+            },
+            "settingsModal": {
+                "settings": "Configuración",
+                "expandMessages": "Expandir Mensajes",
+                "hideChainOfThought": "Ocultar Cadena de Pensamiento",
+                "darkMode": "Modo Oscuro"
+            },
+            "detailsButton": {
+                "using": "Usando",
+                "running": "En ejecución",
+                "took_one": "Tomó {{count}} paso",
+                "took_other": "Tomó {{count}} pasos"
+            },
+            "auth": {
+                "authLogin": {
+                    "title": "Inicia sesión para acceder a la aplicación.",
+                    "form": {
+                        "email": "Dirección de correo electrónico",
+                        "password": "Contraseña",
+                        "noAccount": "¿No tienes una cuenta?",
+                        "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+                        "signup": "Registrarse",
+                        "signin": "Iniciar sesión",
+                        "or": "O",
+                        "continue": "Continuar",
+                        "forgotPassword": "¿Olvidaste la contraseña?",
+                        "passwordMustContain": "Tu contraseña debe contener:",
+                        "emailRequired": "El correo electrónico es un campo obligatorio",
+                        "passwordRequired": "La contraseña es un campo obligatorio"
+                    },
+                    "error": {
+                        "default": "No se pudo iniciar sesión.",
+                        "signin": "Intenta iniciar sesión con una cuenta diferente.",
+                        "oauthsignin": "Intenta iniciar sesión con una cuenta diferente.",
+                        "redirect_uri_mismatch": "La URI de redirección no coincide con la configuración de la aplicación oauth.",
+                        "oauthcallbackerror": "Intenta iniciar sesión con una cuenta diferente.",
+                        "oauthcreateaccount": "Intenta iniciar sesión con una cuenta diferente.",
+                        "emailcreateaccount": "Intenta iniciar sesión con una cuenta diferente.",
+                        "callback": "Intenta iniciar sesión con una cuenta diferente.",
+                        "oauthaccountnotlinked": "Para confirmar tu identidad, inicia sesión con la misma cuenta que usaste originalmente.",
+                        "emailsignin": "No se pudo enviar el correo electrónico.",
+                        "emailverify": "Por favor, verifica tu correo electrónico, se ha enviado un nuevo correo electrónico.",
+                        "credentialssignin": "Error al iniciar sesión. Verifica que los datos proporcionados sean correctos.",
+                        "sessionrequired": "Por favor, inicia sesión para acceder a esta página."
+                    }
+                },
+                "authVerifyEmail": {
+                    "almostThere": "¡Ya casi estás ahí! Hemos enviado un correo electrónico a ",
+                    "verifyEmailLink": "Por favor, haz clic en el enlace en ese correo electrónico para completar tu registro.",
+                    "didNotReceive": "¿No encuentras el correo electrónico?",
+                    "resendEmail": "Reenviar correo electrónico",
+                    "goBack": "Regresar",
+                    "emailSent": "Correo electrónico enviado exitosamente.",
+                    "verifyEmail": "Verifica tu dirección de correo electrónico"
+                },
+                "providerButton": {
+                    "continue": "Continuar con {{provider}}",
+                    "signup": "Registrarse con {{provider}}"
+                },
+                "authResetPassword": {
+                    "newPasswordRequired": "La nueva contraseña es un campo obligatorio",
+                    "passwordsMustMatch": "Las contraseñas deben coincidir",
+                    "confirmPasswordRequired": "Confirmar contraseña es un campo obligatorio",
+                    "newPassword": "Nueva contraseña",
+                    "confirmPassword": "Confirmar contraseña",
+                    "resetPassword": "Restablecer Contraseña"
+                },
+                "authForgotPassword": {
+                    "email": "Dirección de correo electrónico",
+                    "emailRequired": "El correo electrónico es un campo obligatorio",
+                    "emailSent": "Por favor, revisa la dirección de correo electrónico {{email}} para obtener instrucciones para restablecer tu contraseña.",
+                    "enterEmail": "Ingresa tu dirección de correo electrónico y te enviaremos instrucciones para restablecer tu contraseña.",
+                    "resendEmail": "Reenviar correo electrónico",
+                    "continue": "Continuar",
+                    "goBack": "Regresar"
+                }
+            }
+        },
+        "organisms": {
+            "chat": {
+                "history": {
+                    "index": {
+                        "showHistory": "Mostrar historial",
+                        "lastInputs": "Últimas entradas",
+                        "noInputs": "Tan vacío...",
+                        "loading": "Cargando..."
+                    }
+                },
+                "inputBox": {
+                    "input": {
+                        "placeholder": "Escribe tu mensaje aquí..."
+                    },
+                    "speechButton": {
+                        "start": "Comenzar grabación",
+                        "stop": "Detener grabación"
+                    },
+                    "SubmitButton": {
+                        "sendMessage": "Enviar mensaje",
+                        "stopTask": "Detener Tarea"
+                    },
+                    "UploadButton": {
+                        "attachFiles": "Adjuntar archivos"
+                    },
+                    "waterMark": {
+                        "text": "Desarrollado con"
+                    }
+                },
+                "Messages": {
+                    "index": {
+                        "running": "En ejecución",
+                        "executedSuccessfully": "ejecutado con éxito",
+                        "failed": "fallido",
+                        "feedbackUpdated": "Comentarios actualizados",
+                        "updating": "Actualizando"
+                    }
+                },
+                "dropScreen": {
+                    "dropYourFilesHere": "Suelta tus archivos aquí"
+                },
+                "index": {
+                    "failedToUpload": "Error al subir",
+                    "cancelledUploadOf": "Subida cancelada de",
+                    "couldNotReachServer": "No se pudo conectar con el servidor",
+                    "continuingChat": "Continuando el chat anterior"
+                },
+                "settings": {
+                    "settingsPanel": "Panel de configuración",
+                    "reset": "Restablecer",
+                    "cancel": "Cancelar",
+                    "confirm": "Confirmar"
+                }
+            },
+            "threadHistory": {
+                "sidebar": {
+                    "filters": {
+                        "FeedbackSelect": {
+                            "feedbackAll": "Comentarios: Todos",
+                            "feedbackPositive": "Comentarios: Positivos",
+                            "feedbackNegative": "Comentarios: Negativos"
+                        },
+                        "SearchBar": {
+                            "search": "Buscar"
+                        }
+                    },
+                    "DeleteThreadButton": {
+                        "confirmMessage": "Esto eliminará el hilo así como sus mensajes y elementos.",
+                        "cancel": "Cancelar",
+                        "confirm": "Confirmar",
+                        "deletingChat": "Eliminando chat",
+                        "chatDeleted": "Chat eliminado"
+                    },
+                    "index": {
+                        "pastChats": "Chats Pasados"
+                    },
+                    "ThreadList": {
+                        "empty": "Vacío...",
+                        "today": "Hoy",
+                        "yesterday": "Ayer",
+                        "previous7days": "Últimos 7 días",
+                        "previous30days": "Últimos 30 días"
+                    },
+                    "TriggerButton": {
+                        "closeSidebar": "Cerrar barra lateral",
+                        "openSidebar": "Abrir barra lateral"
+                    }
+                },
+                "Thread": {
+                    "backToChat": "Volver al chat",
+                    "chatCreatedOn": "Este chat fue creado el"
+                }
+            },
+            "header": {
+                "chat": "Chat",
+                "readme": "Léeme"
+            }
+        }
+    },
+    "hooks": {
+        "useLLMProviders": {
+            "failedToFetchProviders": "Error al obtener proveedores:"
+        }
+    },
+    "pages": {
+        "Design": {},
+        "Env": {
+            "savedSuccessfully": "Guardado exitosamente",
+            "requiredApiKeys": "Claves API necesarias",
+            "requiredApiKeysInfo": "Para usar esta aplicación, se requieren las siguientes claves API. Las claves se almacenan en el almacenamiento local de tu dispositivo."
+        },
+        "Page": {
+            "notPartOfProject": "No eres parte de este proyecto."
+        },
+        "ResumeButton": {
+            "resumeChat": "Reanudar Chat"
+        }
+    }
+}

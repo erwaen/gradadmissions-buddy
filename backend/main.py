@@ -98,6 +98,8 @@ async def retrieve_data(wclient = Depends(get_weaviate_client)):
     await insert_data(wclient)  # Directly call the insert data function
 
     return {"message": "Data retrieved, processed, and inserted successfully"}
-
+@app.head("/health")
+async def xd():
+    return True
 # if __name__ == "__main__":
 #     uvicorn.run(app, host="0.0.0.0", port=80, reload=False)

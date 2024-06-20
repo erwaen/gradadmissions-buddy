@@ -1,0 +1,66 @@
+[project]
+enable_telemetry = true
+name = "GradAdmissionsBuddy"
+public = true
+user_env = []
+session_timeout = 3600
+cache = false
+allow_origins = ["*"]
+follow_symlink = false
+
+[features]
+prompt_playground = true
+unsafe_allow_html = false
+latex = false
+auto_tag_thread = true
+
+[features.spontaneous_file_upload]
+enabled = true
+accept = ["*/*"]
+max_files = 20
+max_size_mb = 500
+
+[features.audio]
+min_decibels = -45
+initial_silence_timeout = 3000
+silence_timeout = 1500
+max_duration = 15000
+chunk_duration = 1000
+sample_rate = 44100
+
+[UI]
+name = "GradAdmissionsBuddy"
+show_readme_as_default = true
+default_collapse_content = true
+default_expand_messages = false
+hide_cot = false
+github = "https://github.com/erwaen/gradadmissions-buddy"
+custom_font = "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
+custom_css = "custom.css"
+custom_js = "custom.js"
+
+[UI.theme]
+layout = "wide"
+font_family = "Inter, sans-serif"
+
+[UI.theme.light]
+background = "#E8F5E9"
+paper = "#FFFFFF"
+
+[UI.theme.light.primary]
+main = "#3F51B5"  # Indigo
+dark = "#303F9F"  # Dark Indigo
+light = "#C5CAE9"  # Light Indigo
+
+[UI.theme.dark]
+background = "#212121"
+paper = "#424242"
+
+[UI.theme.dark.primary]
+main = "#00ACC1"  # Cyan
+dark = "#007C91"  # Dark Cyan
+light = "#B2EBF2"  # Light Cyan
+
+[meta]
+generated_by = "1.1.202"

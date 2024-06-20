@@ -162,6 +162,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+langchain-chainlit-docker-deployment-template/pyvenv.cfg
+langchain-chainlit-docker-deployment-template/dataset
+langchain-chainlit-docker-deployment-template/Scripts
+langchain-chainlit-docker-deployment-template/include
+backend/weaviate_data
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore

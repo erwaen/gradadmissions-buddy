@@ -1,0 +1,25 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background);
+}
+
+button {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+a[href*='https://github.com/Chainlit/chainlit'] {
+    visibility: hidden;
+}
